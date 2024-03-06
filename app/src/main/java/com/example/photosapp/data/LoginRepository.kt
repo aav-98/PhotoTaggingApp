@@ -71,7 +71,12 @@ class LoginRepository(val dataSource: LoginDataSource, appContext: Context) {
             putString(context.getString(R.string.email_key), loggedInUser.email)
             putString(context.getString(R.string.living_city_key), loggedInUser.livingCity)
             putString(context.getString(R.string.year_of_birth_key), loggedInUser.yearOfBirth)
+            apply()
         }
+        val loggedIn = sharedPref.getBoolean(context.getString(R.string.is_logged_in), false)
+        val user_id = sharedPref.getString(context.getString(R.string.user_id_key), "no idea")
+        Log.d("SHAREDP - Login", loggedIn.toString())
+        Log.d("SHAREDP - Login", user_id.toString())
         // If user credentials will be cached in local storage, it is recommended it be encrypted
         // @see https://developer.android.com/training/articles/keystore
     }

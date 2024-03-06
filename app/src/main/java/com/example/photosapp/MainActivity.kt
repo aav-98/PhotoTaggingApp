@@ -2,6 +2,7 @@ package com.example.photosapp
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -72,6 +73,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun isLoggedIn(): Boolean {
         val sharedPreferences = getSharedPreferences("com.example.photosapp.USER_DETAILS", Context.MODE_PRIVATE)
-        return sharedPreferences.getBoolean("isLoggedIn", false)
+        val loggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
+        val user_id = sharedPreferences.getString("USER ID: ", "no idea")
+        Log.d("SHAREDP", loggedIn.toString())
+        Log.d("SHAREDP", user_id.toString())
+        return loggedIn
     }
 }

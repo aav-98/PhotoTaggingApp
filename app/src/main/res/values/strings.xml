@@ -7,6 +7,16 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
+    <!-- LOGIN -->
+    <string name="user_id_key">USER ID: </string>
+    <string name="first_name_key">First Name: </string>
+    <string name="last_name_key">Last Name: </string>
+    <string name="passHash_key">Hashed Password: </string>
+    <string name="email_key">Email: </string>
+    <string name="living_city_key">City of Residence: </string>
+    <string name="year_of_birth_key">Date of Birth: </string>
+    <string name="is_logged_in">isLoggedIn</string>
+
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus

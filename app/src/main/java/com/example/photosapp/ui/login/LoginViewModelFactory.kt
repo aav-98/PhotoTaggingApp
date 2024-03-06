@@ -17,7 +17,7 @@ class LoginViewModelFactory(private val appContext: Context) : ViewModelProvider
         if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
             return LoginViewModel(
                 loginRepository = LoginRepository(
-                    dataSource = LoginDataSource(appContext)
+                    dataSource = LoginDataSource(appContext), appContext
                 )
             ) as T
         }

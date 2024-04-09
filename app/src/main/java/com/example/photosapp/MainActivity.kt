@@ -1,6 +1,7 @@
 package com.example.photosapp
 
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import com.google.android.material.snackbar.Snackbar
@@ -13,6 +14,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
 import com.example.photosapp.databinding.ActivityMainBinding
 import com.example.photosapp.ui.login.LoginViewModel
@@ -22,7 +25,10 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+
     private lateinit var loginViewModel: LoginViewModel
+    private lateinit var pickImageLauncher: ActivityResultLauncher<String>
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,15 +46,15 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         if (isLoggedIn()) {
-            navController.navigate(R.id.action_global_homeFragment)
+            navController.navigate(R.id.action_global_HomeFragment)
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination.id == R.id.homeFragment) {
+            if (destination.id == R.id.HomeFragment) {
                 supportActionBar?.setDisplayHomeAsUpEnabled(false)
                 binding.addButton.visibility = View.VISIBLE
                 binding.profileButton.visibility = View.VISIBLE
-            } else if (destination.id == R.id.loginFragment) {
+            } else if (destination.id == R.id.LoginFragment) {
                 supportActionBar?.setDisplayHomeAsUpEnabled(false)
                 binding.addButton.visibility = View.GONE
                 binding.profileButton.visibility = View.GONE
@@ -60,17 +66,20 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                navigateToPreviewFragment(it)
+            }
+        }
+
         binding.profileButton.setOnClickListener {
             navController.navigate(R.id.action_HomeFragment_to_ProfileFragment)
         }
 
         binding.addButton.setOnClickListener {
-            navController.navigate(R.id.action_homeFragment_to_galleryFragment)
+            pickImageLauncher.launch("image/*")
         }
-
-
     }
-
 
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
@@ -85,5 +94,11 @@ class MainActivity : AppCompatActivity() {
         Log.d("SHAREDP", loggedIn.toString())
         Log.d("SHAREDP", user_id.toString())
         return loggedIn
+    }
+
+    private fun navigateToPreviewFragment(imageUri: Uri) {
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        val action = HomeFragmentDirections.actionHomeFragmentToPreviewFragment(imageUri.toString())
+        navController.navigate(action)
     }
 }

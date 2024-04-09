@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/loginFragment">
+    app:startDestination="@id/LoginFragment">
 
 
     <fragment
-        android:id="@+id/homeFragment"
+        android:id="@+id/HomeFragment"
         android:name="com.example.photosapp.HomeFragment"
         android:label=""
         tools:layout="@layout/fragment_home">
@@ -16,8 +16,8 @@
             android:id="@+id/action_HomeFragment_to_ProfileFragment"
             app:destination="@id/ProfileFragment" />
         <action
-            android:id="@+id/action_homeFragment_to_galleryFragment"
-            app:destination="@id/galleryFragment" />
+            android:id="@+id/action_HomeFragment_to_PreviewFragment"
+            app:destination="@id/PreviewFragment" />
     </fragment>
     <fragment
         android:id="@+id/ProfileFragment"
@@ -27,29 +27,36 @@
 
         <action
             android:id="@+id/action_ProfileFragment_to_HomeFragment"
-            app:destination="@id/homeFragment" />
+            app:destination="@id/HomeFragment" />
         <action
-            android:id="@+id/action_ProfileFragment_to_loginFragment"
-            app:destination="@+id/loginFragment"
+            android:id="@+id/action_ProfileFragment_to_LoginFragment"
+            app:destination="@+id/LoginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true"
         />
+
     </fragment>
     <fragment
-        android:id="@+id/loginFragment"
+        android:id="@+id/LoginFragment"
         android:name="com.example.photosapp.ui.login.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login" >
         <action
-            android:id="@+id/action_loginFragment_to_homeFragment"
-            app:destination="@id/homeFragment" />
+            android:id="@+id/action_LoginFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
     </fragment>
     <fragment
-        android:id="@+id/galleryFragment"
-        android:name="com.example.photosapp.GalleryFragment"
-        android:label="fragment_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        android:id="@+id/PreviewFragment"
+        android:name="com.example.photosapp.PreviewFragment"
+        android:label=" "
+        tools:layout="@layout/fragment_preview">
+        <argument
+            android:name="photoURI"
+            app:argType="string"/>
+    </fragment>
+
     <action
-        android:id="@+id/action_global_homeFragment"
-        app:destination="@id/homeFragment" />
+        android:id="@+id/action_global_HomeFragment"
+        app:destination="@id/HomeFragment" />
+
 </navigation>

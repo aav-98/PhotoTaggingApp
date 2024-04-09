@@ -38,7 +38,7 @@ class ProfileFragment : Fragment() {
         
         binding.logOutButton.setOnClickListener {
             logout()
-            findNavController().navigate(R.id.action_ProfileFragment_to_loginFragment)
+            findNavController().navigate(R.id.action_ProfileFragment_to_LoginFragment)
         }
         return binding.root
 

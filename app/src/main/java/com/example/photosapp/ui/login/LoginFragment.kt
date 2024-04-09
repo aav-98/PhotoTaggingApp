@@ -80,7 +80,7 @@ class LoginFragment : Fragment() {
                 loginResult.success?.let {
                     updateUiWithUser(it)
                     Log.d(TAG, "Login success")
-                    findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
+                    findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)
                 }
                 loginResult.loggedOut?.let {
                     //TODO: logic when user logs out

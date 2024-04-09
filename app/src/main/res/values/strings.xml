@@ -9,11 +9,11 @@
 
     <!-- LOGIN -->
     <string name="user_id_key">USER ID: </string>
-    <string name="first_name_key">First Name: </string>
-    <string name="last_name_key">Last Name: </string>
+    <string name="first_name_key">first_name</string>
+    <string name="last_name_key">last_name</string>
     <string name="passHash_key">Hashed Password: </string>
     <string name="email_key">Email: </string>
-    <string name="living_city_key">City of Residence: </string>
+    <string name="living_city_key">city_of_residence</string>
     <string name="year_of_birth_key">Date of Birth: </string>
     <string name="is_logged_in">isLoggedIn</string>
 
@@ -64,4 +64,11 @@
     <string name="login_failed">"Login failed"</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- ProfileFragment Strings -->
+    <string name="name">Name</string>
+    <string name="change_password">Change Password</string>
+    <string name="log_out">Log out</string>
+    <string name="city_of_residence">City of residence</string>
+    <string name="date_of_birth">Date of birth</string>
 </resources>

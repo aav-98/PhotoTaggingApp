@@ -6,6 +6,8 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.example.photosapp.MainActivity
+import com.example.photosapp.R
 import com.example.photosapp.data.model.LoggedInUser
 import com.google.gson.Gson
 import java.io.IOException
@@ -40,9 +42,13 @@ class LoginDataSource(context: Context) {
             Method.POST, url,
             Response.Listener<String> { response ->
                 Log.d(TAG, response)
-                val gson = Gson()
-                val user: LoggedInUser = gson.fromJson(response, LoggedInUser::class.java)
-                callback.onResult(Result.Success(user))
+                if (response != "") {
+                    val gson = Gson()
+                    val user: LoggedInUser = gson.fromJson(response, LoggedInUser::class.java)
+                    callback.onResult(Result.Success(user))
+                } else {
+                    callback.onResult(Result.Error(IOException("Error logging in")))
+                }
             },
             Response.ErrorListener { error ->
                 Log.e(TAG, "Login failed: ${error.message}")
@@ -61,7 +67,12 @@ class LoginDataSource(context: Context) {
     }
 
     fun logout() {
-        // TODO: revoke authentication
+        val sharedPreferences = appContext.getSharedPreferences("com.example.photosapp.USER_DETAILS", Context.MODE_PRIVATE)
+        sharedPreferences.edit().clear().apply()
+        with (sharedPreferences.edit()) {
+            putBoolean(appContext.getString(com.example.photosapp.R.string.is_logged_in), false)
+            apply()
+        }
     }
 
     private fun md5(input: String): String {

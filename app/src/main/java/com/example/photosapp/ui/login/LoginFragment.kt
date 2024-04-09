@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
 import com.example.photosapp.databinding.FragmentLoginBinding
 import androidx.navigation.fragment.findNavController
@@ -23,7 +25,9 @@ import com.example.photosapp.R
 
 class LoginFragment : Fragment() {
 
-    private lateinit var loginViewModel: LoginViewModel
+    private val TAG = javaClass.simpleName
+
+    //private lateinit var loginViewModel: LoginViewModel
     private var _binding: FragmentLoginBinding? = null
 
     // This property is only valid between onCreateView and
@@ -43,8 +47,9 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loginViewModel = ViewModelProvider(this, LoginViewModelFactory(requireContext().applicationContext))
-            .get(LoginViewModel::class.java)
+        //loginViewModel = ViewModelProvider(this, LoginViewModelFactory(requireContext().applicationContext))
+        //    .get(LoginViewModel::class.java)
+        val loginViewModel: LoginViewModel by activityViewModels()
 
         val usernameEditText = binding.username
         val passwordEditText = binding.password
@@ -74,7 +79,11 @@ class LoginFragment : Fragment() {
                 }
                 loginResult.success?.let {
                     updateUiWithUser(it)
+                    Log.d(TAG, "Login success")
                     findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
+                }
+                loginResult.loggedOut?.let {
+                    //TODO: logic when user logs out
                 }
             })
 
@@ -112,6 +121,8 @@ class LoginFragment : Fragment() {
                 usernameEditText.text.toString(),
                 passwordEditText.text.toString()
             )
+            Log.d(TAG, usernameEditText.text.toString())
+            Log.d(TAG, passwordEditText.text.toString())
         }
     }
 

@@ -28,6 +28,13 @@
         <action
             android:id="@+id/action_ProfileFragment_to_HomeFragment"
             app:destination="@id/HomeFragment" />
+        <action
+            android:id="@+id/action_ProfileFragment_to_LoginFragment"
+            app:destination="@+id/LoginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true"
+        />
+
     </fragment>
     <fragment
         android:id="@+id/LoginFragment"

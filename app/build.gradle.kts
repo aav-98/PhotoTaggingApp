@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("androidx.navigation.safeargs.kotlin")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -40,6 +41,7 @@ android {
 }
 
 dependencies {
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
     val nav_version = "2.7.7"
 
     implementation("androidx.core:core-ktx:1.12.0")

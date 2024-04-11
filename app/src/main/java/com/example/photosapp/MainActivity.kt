@@ -1,6 +1,7 @@
 package com.example.photosapp
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -13,28 +14,35 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import com.example.photosapp.databinding.ActivityMainBinding
 import com.example.photosapp.ui.login.LoginViewModel
 import com.example.photosapp.ui.login.LoginViewModelFactory
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
     private lateinit var loginViewModel: LoginViewModel
+    private lateinit var photoViewModel: PhotoViewModel
     private lateinit var pickImageLauncher: ActivityResultLauncher<String>
 
+    private val maxPhotos = 5 //Server can only have 5 photos per person
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         loginViewModel = ViewModelProvider(this, LoginViewModelFactory(this))
             .get(LoginViewModel::class.java)
+
+        photoViewModel = ViewModelProvider(this, PhotoViewModelFactory(this))
+            .get(PhotoViewModel::class.java)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -46,7 +54,12 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         if (isLoggedIn()) {
-            navController.navigate(R.id.action_global_HomeFragment)
+            photoViewModel.loadTags()
+            //Fixme: There is probably a better way to do this?
+            photoViewModel.tagsLiveData.observe(this) {
+                photoViewModel.loadPhotos()
+                navController.navigate(R.id.action_global_HomeFragment)
+            }
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -100,5 +113,20 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         val action = HomeFragmentDirections.actionHomeFragmentToPreviewFragment(imageUri.toString())
         navController.navigate(action)
+    }
+
+    /**
+     * Disables/enables the add-button on the action bar based on how many photos have been uploaded and the max photos allowed
+     */
+    override fun onPhotoCountChanged(count: Int) {
+        if (count >= maxPhotos) {
+            binding.addButton.setOnClickListener {
+                Toast.makeText(applicationContext, "Max number of photos added!", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            binding.addButton.setOnClickListener {
+                pickImageLauncher.launch("image/*")
+            }
+        }
     }
 }

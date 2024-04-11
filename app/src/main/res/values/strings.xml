@@ -46,5 +46,9 @@
     <string name="add_button_text">Add</string>
     <string name="location_text_default">No location information available</string>
     <string name="placeholder_chip_text">Placeholder</string>
+    <string name="delete_button_text">Delete</string>
+    <string name="edit_post_button_text">Edit post</string>
+    <string name="peopleView_default">No people in photo</string>
+    <string name="description_default">No caption...</string>
 
 </resources>

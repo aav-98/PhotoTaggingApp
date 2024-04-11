@@ -20,6 +20,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
 import com.example.photosapp.databinding.FragmentLoginBinding
 import androidx.navigation.fragment.findNavController
+import com.example.photosapp.PhotoViewModel
+import com.example.photosapp.PhotoViewModelFactory
 
 import com.example.photosapp.R
 
@@ -56,6 +58,10 @@ class LoginFragment : Fragment() {
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
 
+        val photoViewModel: PhotoViewModel by activityViewModels {
+            PhotoViewModelFactory(requireActivity().applicationContext)
+        }
+
         loginViewModel.loginFormState.observe(viewLifecycleOwner,
             Observer { loginFormState ->
                 if (loginFormState == null) {
@@ -80,7 +86,13 @@ class LoginFragment : Fragment() {
                 loginResult.success?.let {
                     updateUiWithUser(it)
                     Log.d(TAG, "Login success")
-                    findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)
+                    photoViewModel.loadTags()
+                    //FixMe: Not sure this is the best way to do it
+                    photoViewModel.tagsLiveData.observe(viewLifecycleOwner) {
+                        photoViewModel.loadPhotos()
+                        findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)
+                    }
+
                 }
                 loginResult.loggedOut?.let {
                     //TODO: logic when user logs out

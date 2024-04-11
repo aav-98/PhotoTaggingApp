@@ -18,6 +18,9 @@
         <action
             android:id="@+id/action_HomeFragment_to_PreviewFragment"
             app:destination="@id/PreviewFragment" />
+        <action
+            android:id="@+id/action_HomeFragment_to_PostDetailFragment"
+            app:destination="@id/PostDetailFragment" />
     </fragment>
     <fragment
         android:id="@+id/ProfileFragment"
@@ -53,10 +56,22 @@
         <argument
             android:name="photoURI"
             app:argType="string"/>
+        <action
+            android:id="@+id/action_PreviewFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
     </fragment>
 
     <action
         android:id="@+id/action_global_HomeFragment"
         app:destination="@id/HomeFragment" />
+    <fragment
+        android:id="@+id/PostDetailFragment"
+        android:name="com.example.photosapp.PostDetailFragment"
+        android:label=" "
+        tools:layout="@layout/fragment_post_detail" >
+        <argument
+            android:name="pos"
+            app:argType="integer"/>
+    </fragment>
 
 </navigation>

@@ -33,10 +33,13 @@
             app:destination="@id/HomeFragment" />
         <action
             android:id="@+id/action_ProfileFragment_to_LoginFragment"
-            app:destination="@+id/LoginFragment"
+            app:destination="@+id/mainActivity"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true"
         />
+        <action
+            android:id="@+id/action_ProfileFragment_to_ChangePasswordFragment"
+            app:destination="@id/ChangePasswordFragment" />
 
     </fragment>
     <fragment
@@ -73,5 +76,24 @@
             android:name="pos"
             app:argType="integer"/>
     </fragment>
+
+    <fragment
+        android:id="@+id/ChangePasswordFragment"
+        android:name="com.example.photosapp.ChangePasswordFragment"
+        android:label="fragment_change_password"
+        tools:layout="@layout/fragment_change_password">
+        <action
+            android:id="@+id/action_ChangePasswordFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
+    </fragment>
+
+    <activity
+        android:id="@+id/mainActivity"
+        android:name="com.example.photosapp.MainActivity"
+        android:label="activity_main"
+        tools:layout="@layout/activity_main">
+    </activity>
+
+
 
 </navigation>

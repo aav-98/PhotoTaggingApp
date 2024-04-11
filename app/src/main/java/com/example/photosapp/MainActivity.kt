@@ -55,6 +55,7 @@ class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
 
         if (isLoggedIn()) {
             photoViewModel.loadTags()
+            loginViewModel.loadUser()
             //Fixme: There is probably a better way to do this?
             photoViewModel.tagsLiveData.observe(this) {
                 photoViewModel.loadPhotos()

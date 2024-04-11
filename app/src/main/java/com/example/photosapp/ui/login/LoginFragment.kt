@@ -24,6 +24,8 @@ import com.example.photosapp.PhotoViewModel
 import com.example.photosapp.PhotoViewModelFactory
 
 import com.example.photosapp.R
+import com.example.photosapp.data.model.LoggedInUser
+import java.io.IOException
 
 class LoginFragment : Fragment() {
 
@@ -36,31 +38,30 @@ class LoginFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    val loginViewModel: LoginViewModel by activityViewModels()
+
+    val photoViewModel: PhotoViewModel by activityViewModels {
+        PhotoViewModelFactory(requireActivity().applicationContext)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
-        return binding.root
 
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //loginViewModel = ViewModelProvider(this, LoginViewModelFactory(requireContext().applicationContext))
-        //    .get(LoginViewModel::class.java)
-        val loginViewModel: LoginViewModel by activityViewModels()
 
         val usernameEditText = binding.username
         val passwordEditText = binding.password
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
-
-        val photoViewModel: PhotoViewModel by activityViewModels {
-            PhotoViewModelFactory(requireActivity().applicationContext)
-        }
 
         loginViewModel.loginFormState.observe(viewLifecycleOwner,
             Observer { loginFormState ->
@@ -84,18 +85,12 @@ class LoginFragment : Fragment() {
                     showLoginFailed(it)
                 }
                 loginResult.success?.let {
-                    updateUiWithUser(it)
+                    loginUser(it)
                     Log.d(TAG, "Login success")
-                    photoViewModel.loadTags()
-                    //FixMe: Not sure this is the best way to do it
-                    photoViewModel.tagsLiveData.observe(viewLifecycleOwner) {
-                        photoViewModel.loadPhotos()
-                        findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)
-                    }
 
                 }
                 loginResult.loggedOut?.let {
-                    //TODO: logic when user logs out
+                    Log.d(TAG, "User logged out registered in login fragment")
                 }
             })
 
@@ -119,10 +114,14 @@ class LoginFragment : Fragment() {
         passwordEditText.addTextChangedListener(afterTextChangedListener)
         passwordEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
+                loadingProgressBar.visibility = View.VISIBLE
                 loginViewModel.login(
                     usernameEditText.text.toString(),
                     passwordEditText.text.toString()
                 )
+                loginButton.visibility = View.GONE
+                //Log.d(TAG, usernameEditText.text.toString())
+                //Log.d(TAG, passwordEditText.text.toString())
             }
             false
         }
@@ -133,21 +132,28 @@ class LoginFragment : Fragment() {
                 usernameEditText.text.toString(),
                 passwordEditText.text.toString()
             )
-            Log.d(TAG, usernameEditText.text.toString())
-            Log.d(TAG, passwordEditText.text.toString())
+            loginButton.visibility = View.GONE
+            //Log.d(TAG, usernameEditText.text.toString())
+            //Log.d(TAG, passwordEditText.text.toString())
         }
     }
 
-    private fun updateUiWithUser(model: LoggedInUserView) {
-        val welcome = getString(R.string.welcome) + model.displayName
-        // TODO : initiate successful logged in experience
+    private fun loginUser(user: LoggedInUser) {
+        val welcome = getString(R.string.welcome) + user.firstName
+        Log.d("NavController", "Current destination: ${findNavController().currentDestination?.id}")
+        photoViewModel.loadTags()
+        //FixMe: Not sure this is the best way to do it
+        photoViewModel.tagsLiveData.observe(viewLifecycleOwner) {
+            photoViewModel.loadPhotos()
+            findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)
+        }
         val appContext = context?.applicationContext ?: return
         Toast.makeText(appContext, welcome, Toast.LENGTH_LONG).show()
     }
 
-    private fun showLoginFailed(@StringRes errorString: Int) {
+    private fun showLoginFailed(error: IOException) {
         val appContext = context?.applicationContext ?: return
-        Toast.makeText(appContext, errorString, Toast.LENGTH_LONG).show()
+        Toast.makeText(appContext, error.toString(), Toast.LENGTH_LONG).show()
     }
 
     override fun onDestroyView() {

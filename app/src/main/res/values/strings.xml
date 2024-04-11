@@ -8,23 +8,23 @@
     <string name="previous">Previous</string>
 
     <!-- LOGIN -->
-    <string name="user_id_key">USER ID: </string>
+    <string name="user_id_key">user_id</string>
     <string name="first_name_key">first_name</string>
     <string name="last_name_key">last_name</string>
-    <string name="passHash_key">Hashed Password: </string>
-    <string name="email_key">Email: </string>
-    <string name="living_city_key">city_of_residence</string>
-    <string name="year_of_birth_key">Date of Birth: </string>
-    <string name="is_logged_in">isLoggedIn</string>
+    <string name="passHash_key">passHash</string>
+    <string name="email_key">email</string>
+    <string name="living_city_key">living_city</string>
+    <string name="year_of_birth_key">year_of_birth</string>
+    <string name="is_logged_in">is_logged_in</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome!"</string>
+    <string name="welcome">"Welcome "</string>
     <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="invalid_password">Password must be >3 characters</string>
     <string name="login_failed">"Login failed"</string>
 
     <!-- TODO: Remove or change this placeholder text -->
@@ -50,5 +50,9 @@
     <string name="edit_post_button_text">Edit post</string>
     <string name="peopleView_default">No people in photo</string>
     <string name="description_default">No caption...</string>
+
+    <!--Strings related to change password fragment -->
+    <string name="old_password">Old Password</string>
+    <string name="new_password">New Password</string>
 
 </resources>

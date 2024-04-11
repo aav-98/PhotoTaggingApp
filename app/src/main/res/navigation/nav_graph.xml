@@ -73,8 +73,11 @@
         android:label=" "
         tools:layout="@layout/fragment_post_detail" >
         <argument
-            android:name="pos"
-            app:argType="integer"/>
+            android:name="photoFn"
+            app:argType="string"/>
+        <action
+            android:id="@+id/action_PostDetailFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
     </fragment>
 
     <fragment

@@ -45,12 +45,12 @@ class HomeFragment : Fragment() {
         photoViewModel.tagsLiveData.observe(viewLifecycleOwner) { tags ->
             Log.d(TAG, "Tags observed changed")
             if (tags != null) {
-                val photosList = mutableListOf<Bitmap>()
+                val photosList = mutableListOf<Pair<String,Bitmap>>()
                 val adapter = PhotosAdapter(photosList, object : OnPhotoClickListener {
-                    override fun onPhotoClick(position: Int) {
-                        Log.d(TAG, "Photo at position $position clicked")
+                    override fun onPhotoClick(photoFn : String) {
+                        Log.d(TAG, "Photo with filename $photoFn clicked")
                         val action =
-                            HomeFragmentDirections.actionHomeFragmentToPostDetailFragment(position)
+                            HomeFragmentDirections.actionHomeFragmentToPostDetailFragment(photoFn)
                         findNavController().navigate(action)
                     }
                 })
@@ -63,7 +63,7 @@ class HomeFragment : Fragment() {
                     tags.tagPhoto.toList().take(tags.numberOfTags.toInt()).forEach { fn ->
                         photosMap[fn]?.let { base64String ->
                             base64String.toBitmap()?.let { bitmap ->
-                                photosList.add(bitmap)
+                                photosList.add(Pair(fn,bitmap))
                             }
                         } ?: Log.d(TAG, "No photo found for filename: $fn")
                     }

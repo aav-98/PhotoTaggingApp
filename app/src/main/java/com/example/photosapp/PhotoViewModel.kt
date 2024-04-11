@@ -23,6 +23,10 @@ class PhotoViewModel(private val photoRepository: PhotoRepository) : ViewModel()
         photoRepository.publishPost(imageBase64, newTagDes, newTagLoc, newTagPeopleName)
     }
 
+    fun updateTags(position: String, newTagDes: String, newTagPho: String, newTagLoc: String, newTagPeopleName: String) {
+        photoRepository.updateTags(position, newTagDes, newTagPho, newTagLoc, newTagPeopleName)
+    }
+
 
 
 

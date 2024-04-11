@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 
-class PhotosAdapter(private val photos: List<Bitmap>, private val clickListener: OnPhotoClickListener): RecyclerView.Adapter<PhotosAdapter.PhotoViewHolder>() {
+class PhotosAdapter(private val photos: List<Pair<String,Bitmap>>, private val clickListener: OnPhotoClickListener): RecyclerView.Adapter<PhotosAdapter.PhotoViewHolder>() {
 
     class PhotoViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val imageView: ImageView = view.findViewById(R.id.photoImageView)
@@ -19,11 +19,13 @@ class PhotosAdapter(private val photos: List<Bitmap>, private val clickListener:
     }
 
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
-        holder.imageView.setImageBitmap(photos[position])
+        val (photoFn, bitmap) = photos[position]
+        holder.imageView.setImageBitmap(bitmap)
         holder.itemView.setOnClickListener {
-            clickListener.onPhotoClick(position)
+            clickListener.onPhotoClick(photoFn)
         }
     }
 
     override fun getItemCount() = photos.size
 }
+

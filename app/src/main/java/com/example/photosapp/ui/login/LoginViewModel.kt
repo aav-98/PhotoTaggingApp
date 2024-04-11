@@ -1,5 +1,6 @@
 package com.example.photosapp.ui.login
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,29 +10,28 @@ import com.example.photosapp.data.LoginRepository
 import com.example.photosapp.data.Result
 
 import com.example.photosapp.R
+import com.example.photosapp.data.model.LoggedInUser
+import com.example.photosapp.data.newPasswordFormState
 import kotlinx.coroutines.launch
 
 class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel() {
 
+    private val TAG = javaClass.simpleName
+
     private val _loginForm = MutableLiveData<LoginFormState>()
     val loginFormState: LiveData<LoginFormState> = _loginForm
 
-    private val _loginResult = MutableLiveData<LoginResult>()
-    val loginResult: LiveData<LoginResult> = _loginResult
+    private val _newPasswordForm = MutableLiveData<newPasswordFormState>()
+    val newPasswordFormState: LiveData<newPasswordFormState> = _newPasswordForm
+
+    val loginResult: LiveData<LoginResult> = loginRepository.loginResult
+    val user : LiveData<LoggedInUser> = loginRepository.user
+
+    val changePasswordResult: LiveData<Result<String>> = loginRepository.changePasswordResult
 
     fun login(username: String, password: String) {
-        // can be launched in a separate asynchronous job
-        viewModelScope.launch {
-            val loginResponseLiveData = loginRepository.login(username, password)
-            loginResponseLiveData.observeForever { loginResponse ->
-                if (loginResponse is Result.Success) {
-                    _loginResult.value =
-                        LoginResult(success = LoggedInUserView(displayName = loginResponse.data.firstName))
-                } else {
-                    _loginResult.value = LoginResult(error = R.string.login_failed)
-                }
-            }
-        }
+        Log.d(TAG, "Login started")
+        loginRepository.login(username, password)
     }
 
     fun loginDataChanged(username: String, password: String) {
@@ -45,8 +45,8 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
     }
 
     fun logout() {
+        Log.d(TAG, "logout initiated in view model")
         _loginForm.value = LoginFormState(isDataValid = false)
-        _loginResult.value = LoginResult(loggedOut = R.string.log_out)
         loginRepository.logout()
     }
 
@@ -62,5 +62,21 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
     // A placeholder password validation check
     private fun isPasswordValid(password: String): Boolean {
         return password.length > 3
+    }
+
+    fun changePassword(newPassword: String) {
+        loginRepository.changePassword(newPassword)
+    }
+
+    fun newPasswordDataChanged(newPassword: String) {
+        if (!isPasswordValid(newPassword)) {
+            _newPasswordForm.value = newPasswordFormState(passwordError = R.string.invalid_password)
+        } else {
+            _newPasswordForm.value = newPasswordFormState(isDataValid = true)
+        }
+    }
+
+    fun loadUser() {
+        loginRepository.getUser()
     }
 }

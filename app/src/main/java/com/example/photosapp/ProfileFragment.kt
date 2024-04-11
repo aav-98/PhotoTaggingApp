@@ -12,6 +12,7 @@ import com.example.photosapp.databinding.FragmentProfileBinding
 import android.content.SharedPreferences
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
+import com.example.photosapp.data.model.LoggedInUser
 import com.example.photosapp.ui.login.LoginViewModel
 import com.example.photosapp.ui.login.LoginViewModelFactory
 
@@ -20,6 +21,8 @@ import com.example.photosapp.ui.login.LoginViewModelFactory
  */
 class ProfileFragment : Fragment() {
 
+    private val TAG = javaClass.simpleName
+
     private var _binding: FragmentProfileBinding? = null
 
     // This property is only valid between onCreateView and
@@ -27,38 +30,50 @@ class ProfileFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val loginViewModel: LoginViewModel by activityViewModels()
+
+    val sharedPreferences = activity?.getSharedPreferences("com.example.photosapp.USER_DETAILS", Context.MODE_PRIVATE)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
 
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
-
-        setUserDetails()
         
-        binding.logOutButton.setOnClickListener {
-            logout()
-            findNavController().navigate(R.id.action_ProfileFragment_to_LoginFragment)
+
+        binding.changePwdButton.setOnClickListener {
+            findNavController().navigate(R.id.action_ProfileFragment_to_ChangePasswordFragment)
         }
+
+        binding.logOutButton.setOnClickListener {
+            Log.d("LOGIN", "log out button clicked")
+            loginViewModel.logout()
+        }
+
+        loginViewModel.user.observe(viewLifecycleOwner) { user ->
+            displayUserProfile(user)
+        }
+
         return binding.root
 
     }
 
-    private fun setUserDetails() {
-        val sharedPreferences = activity?.getSharedPreferences("com.example.photosapp.USER_DETAILS", Context.MODE_PRIVATE)
-        val firstName = sharedPreferences?.getString("first_name", "Default Name")
-        val lastName = sharedPreferences?.getString("last_name", "Default Name")
-        val cityOfResidence = sharedPreferences?.getString("city_of_residence", "Default City")
-        binding.name.text = "$firstName $lastName"
-    }
-
-    private fun logout(){
-        loginViewModel.logout()
+    private fun displayUserProfile(user: LoggedInUser) {
+        Log.d(TAG, "user profile displayed")
+        binding.name.text = "${user.firstName} ${user.lastName}"
+        binding.cityOfResidence.text = user.livingCity
+        binding.dateOfBirth.text = user.yearOfBirth
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        loginViewModel.loginResult.observe(viewLifecycleOwner) { loginResult ->
+            Log.d(TAG, "Entered login result observer in profile")
+            loginResult.loggedOut?.let {
+                Log.d(TAG, "User logged out registered in profile fragment")
+                findNavController().navigate(R.id.action_ProfileFragment_to_LoginFragment)
+            }
+        }
     }
 
     override fun onDestroyView() {

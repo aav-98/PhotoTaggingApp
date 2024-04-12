@@ -43,6 +43,7 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         photoViewModel.tagsLiveData.observe(viewLifecycleOwner) { tags ->
+            Log.d(TAG, "Tags observed changed")
             if (tags != null) {
                 val photosList = mutableListOf<Bitmap>()
                 val adapter = PhotosAdapter(photosList, object : OnPhotoClickListener {
@@ -57,6 +58,7 @@ class HomeFragment : Fragment() {
                 binding.photosRecyclerView.layoutManager = GridLayoutManager(context, 2)
 
                 photoViewModel.photoLiveData.observe(viewLifecycleOwner) { photosMap ->
+                    Log.d(TAG, "Photos observed changed")
                     photosList.clear()
                     tags.tagPhoto.toList().take(tags.numberOfTags.toInt()).forEach { fn ->
                         photosMap[fn]?.let { base64String ->

@@ -126,7 +126,7 @@ class PhotoRepository(context: Context) {
             uploadPhoto(userId = userId, tagId = indexUpdateTag, fileName=fileName, imageBase64 = imageBase64,
                 onSuccess = {
                     insertNewTags(userId, indexUpdateTag, newTagDes, newTagPho=fileName, newTagLoc, newTagPeopleName,
-                        onSuccess = { getTags() },
+                        onSuccess = { getTags(); getPhotos() },
                         onError = { removePhoto(fileName)})
                 },
                 onError = {

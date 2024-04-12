@@ -26,6 +26,8 @@ import com.example.photosapp.ui.login.LoginViewModelFactory
 
 class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
 
+    private val TAG = javaClass.simpleName
+
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
@@ -59,8 +61,9 @@ class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
             //Fixme: There is probably a better way to do this?
             photoViewModel.tagsLiveData.observe(this) {
                 photoViewModel.loadPhotos()
-                navController.navigate(R.id.action_global_HomeFragment)
             }
+            navController.navigate(R.id.action_global_HomeFragment)
+            Log.d(TAG, "Registered that user was logged in in main activity")
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -102,11 +105,12 @@ class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
     }
 
     private fun isLoggedIn(): Boolean {
+        //TODO: should the user status be loaded from shared preferences in another file?
         val sharedPreferences = getSharedPreferences("com.example.photosapp.USER_DETAILS", Context.MODE_PRIVATE)
-        val loggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
-        val user_id = sharedPreferences.getString("USER ID: ", "no idea")
-        Log.d("SHAREDP", loggedIn.toString())
-        Log.d("SHAREDP", user_id.toString())
+        val loggedIn = sharedPreferences.getBoolean(this.getString(R.string.is_logged_in), false)
+        val user_id = sharedPreferences.getString(this.getString(R.string.user_id_key), "no idea")
+        Log.d(TAG, loggedIn.toString())
+        Log.d(TAG, user_id.toString())
         return loggedIn
     }
 

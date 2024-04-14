@@ -131,7 +131,7 @@ class PhotoRepository(context: Context) {
             onSuccess = {
                 if (indexUpdateTag == numberOfTags) { // Implies a new tag insertion
                     insertNewTags(userId, indexUpdateTag.toString(), newTagDes, fileName, newTagLoc, newTagPeopleName,
-                        onSuccess = { getTags(); getPhotos() },
+                        onSuccess = { getTags() },
                         onError = { removePhoto(fileName) })
                 } else { // Implies updating an existing tag
                     updateTags(indexUpdateTag.toString(), newTagDes, fileName, newTagLoc, newTagPeopleName)

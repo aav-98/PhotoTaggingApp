@@ -64,8 +64,7 @@ class PostDetailFragment : Fragment() {
 
             binding.deleteButton.setOnClickListener {
                 photoViewModel.updateTags(position.toString(), "na", "na", "na", "na")
-                //I dont know why but it does so automatically? And if i do it explicitly it is slower
-                //findNavController().navigate(R.id.action_PostDetailFragment_to_HomeFragment)
+                findNavController().navigate(R.id.action_PostDetailFragment_to_HomeFragment)
             }
 
         }

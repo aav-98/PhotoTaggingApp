@@ -45,6 +45,7 @@ class HomeFragment : Fragment() {
         photoViewModel.tagsLiveData.observe(viewLifecycleOwner) { tags ->
             Log.d(TAG, "Tags observed changed")
             if (tags != null) {
+                photoViewModel.loadPhotos()
                 val photosList = mutableListOf<Pair<String,Bitmap>>()
                 val adapter = PhotosAdapter(photosList, object : OnPhotoClickListener {
                     override fun onPhotoClick(photoFn : String) {

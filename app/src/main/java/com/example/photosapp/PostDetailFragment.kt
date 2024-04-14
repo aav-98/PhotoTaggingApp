@@ -9,8 +9,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.children
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.example.photosapp.databinding.FragmentPostDetailBinding
+import com.google.android.material.chip.Chip
 
 
 class PostDetailFragment : Fragment() {
@@ -36,27 +39,36 @@ class PostDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val position = PostDetailFragmentArgs.fromBundle(requireArguments()).pos
+        val filename = PostDetailFragmentArgs.fromBundle(requireArguments()).photoFn
 
         val tags = photoViewModel.tagsLiveData.value
-        if (tags != null && position < tags.tagId.size) {
+        tags?.tagPhoto?.indexOf(filename)?.let { position ->
+            if (position < tags.tagId.size) {
 
-            val description = tags.tagDes[position]
-            val peopleNames = tags.tagPeopleName[position]
-            val location = tags.tagLocation[position]
+                val description = tags.tagDes[position]
+                val peopleNames = tags.tagPeopleName[position]
+                val location = tags.tagLocation[position]
 
-            if (description != "") binding.descriptionView.text = description
-            if (peopleNames != "") binding.peopleView.text = peopleNames
-            if (location != "") binding.locationView.text = location
+                if (description != "") binding.descriptionView.text = description
+                if (peopleNames != "") binding.peopleView.text = peopleNames
+                if (location != "") binding.locationView.text = location
 
-            val photosMap = photoViewModel.photoLiveData.value
-            if (photosMap != null) {
-                photosMap[tags.tagPhoto[position]]?.let { base64Image ->
-                    binding.imageView.setImageBitmap(base64Image.toBitmap())
+                val photosMap = photoViewModel.photoLiveData.value
+                if (photosMap != null) {
+                    photosMap[tags.tagPhoto[position]]?.let { base64Image ->
+                        binding.imageView.setImageBitmap(base64Image.toBitmap())
+                    }
+
                 }
-
             }
+
+            binding.deleteButton.setOnClickListener {
+                photoViewModel.updateTags(position.toString(), "na", "na", "na", "na")
+                findNavController().navigate(R.id.action_PostDetailFragment_to_HomeFragment)
+            }
+
         }
+
     }
 
     override fun onDestroyView() {

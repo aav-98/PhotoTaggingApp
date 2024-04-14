@@ -117,21 +117,66 @@ class PhotoRepository(context: Context) {
     }
 
     fun publishPost(imageBase64: String, newTagDes: String, newTagLoc: String, newTagPeopleName: String) {
-        val indexUpdateTag = tagsLiveData.value?.numberOfTags
         val userId = sharedPref.getString(appContext.getString(R.string.user_id_key), null)
+        val numberOfTags = tagsLiveData.value?.numberOfTags?.toIntOrNull()
 
-        if (indexUpdateTag != null && userId != null) {
-            val fileName = userId + indexUpdateTag
+        if (userId == null || numberOfTags == null) {
+            Log.d(TAG, "User ID or tag count unavailable.")
+            return
+        }
+        val indexUpdateTag = (findEmptySpaceId().takeIf { it != -1 } ?: numberOfTags)
+        val fileName = userId + indexUpdateTag
 
-            uploadPhoto(userId = userId, tagId = indexUpdateTag, fileName=fileName, imageBase64 = imageBase64,
-                onSuccess = {
-                    insertNewTags(userId, indexUpdateTag, newTagDes, newTagPho=fileName, newTagLoc, newTagPeopleName,
-                        onSuccess = { getTags(); getPhotos() },
-                        onError = { removePhoto(fileName)})
+        uploadPhoto(userId, indexUpdateTag.toString(), fileName, imageBase64,
+            onSuccess = {
+                if (indexUpdateTag == numberOfTags) { // Implies a new tag insertion
+                    insertNewTags(userId, indexUpdateTag.toString(), newTagDes, fileName, newTagLoc, newTagPeopleName,
+                        onSuccess = { getTags() },
+                        onError = { removePhoto(fileName) })
+                } else { // Implies updating an existing tag
+                    updateTags(indexUpdateTag.toString(), newTagDes, fileName, newTagLoc, newTagPeopleName)
+                }
+            },
+            onError = {
+                Toast.makeText(appContext, "Could not upload post", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
+    fun updateTags(indexUpdateTag: String, updateTagDes: String, updateTagPho: String, updateTagLoc: String, updateTagPeopleName: String) {
+        val userId = sharedPref.getString(appContext.getString(R.string.user_id_key), null)
+        if (userId != null ) {
+            val queue = Volley.newRequestQueue(appContext)
+
+            val url = "http://10.0.2.2:8080/postUpdateTag"
+
+            val stringRequest = object : StringRequest(
+                Method.POST, url,
+                Response.Listener<String> { response ->
+                    Log.d(TAG, "Update tags response: $response")
+                    if (response.toString() == "OK") {
+                        Log.d(TAG, "Successful updating of tags")
+                        getTags()
+                    } else {
+                        Log.d(TAG, "Unsuccessful updating of tags")
+                    }
                 },
-                onError = {
-                    Toast.makeText(appContext, "Could not upload post", Toast.LENGTH_SHORT).show()
-                })
+                Response.ErrorListener { error ->
+                    Log.e(TAG, "Update tags failed: ${error.message}")
+                }) {
+
+                override fun getParams(): Map<String, String> {
+                    val params = HashMap<String, String>()
+                    params["userId"] = userId
+                    params["indexUpdateTag"] = indexUpdateTag
+                    params["updateTagDes"] = updateTagDes
+                    params["updateTagPho"] = updateTagPho
+                    params["updateTagLoc"] = updateTagLoc
+                    params["updateTagPeopleName"] = updateTagPeopleName
+                    return params
+                }
+            }
+            queue.add(stringRequest)
         }
     }
 
@@ -167,7 +212,6 @@ class PhotoRepository(context: Context) {
 
 
     }
-
     private fun uploadPhoto(userId: String, tagId: String, fileName: String, imageBase64: String, onSuccess: () -> Unit, onError: () -> Unit) {
         val queue = Volley.newRequestQueue(appContext)
 
@@ -278,6 +322,10 @@ class PhotoRepository(context: Context) {
         photoLiveData.postValue(currentPhotos)
     }
 
-
+    private fun findEmptySpaceId() : Int {
+        val numberOfTags = tagsLiveData.value?.numberOfTags?.toIntOrNull() ?: 0
+        val photoFilenames = tagsLiveData.value?.tagPhoto?.take(numberOfTags)?: listOf()
+        return photoFilenames.indexOfFirst { it == "na" }
+    }
 
 }

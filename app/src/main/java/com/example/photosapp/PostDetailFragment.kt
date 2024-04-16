@@ -25,7 +25,10 @@ class PostDetailFragment : Fragment() {
         PhotoViewModelFactory(requireActivity().applicationContext)
     }
 
-
+    var photoString = ""
+    var description = ""
+    var peopleNames = ""
+    var location = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,26 +48,44 @@ class PostDetailFragment : Fragment() {
         tags?.tagPhoto?.indexOf(filename)?.let { position ->
             if (position < tags.tagId.size) {
 
-                val description = tags.tagDes[position]
-                val peopleNames = tags.tagPeopleName[position]
-                val location = tags.tagLocation[position]
+                description = tags.tagDes[position]
+                peopleNames = tags.tagPeopleName[position]
+                location = tags.tagLocation[position]
 
                 if (description != "") binding.descriptionView.text = description
                 if (peopleNames != "") binding.peopleView.text = peopleNames
                 if (location != "") binding.locationView.text = location
 
+                photoViewModel.currentImageBitmap.observe(viewLifecycleOwner) { bitmap ->
+                    binding.imageView.setImageBitmap(bitmap)
+
+                }
+                /*
                 val photosMap = photoViewModel.photoLiveData.value
+
                 if (photosMap != null) {
                     photosMap[tags.tagPhoto[position]]?.let { base64Image ->
-                        binding.imageView.setImageBitmap(base64Image.toBitmap())
+                        photoString = base64Image
+                        binding.imageView.setImageBitmap(photoString.toBitmap())
                     }
 
                 }
+
+                 */
             }
 
             binding.deleteButton.setOnClickListener {
-                photoViewModel.updateTags(position.toString(), "na", "na", "na", "na")
+                photoViewModel.updatePost(position.toString(), "na", "na", "na", "na")
                 findNavController().navigate(R.id.action_PostDetailFragment_to_HomeFragment)
+            }
+
+            binding.editPostButton.setOnClickListener {
+                val action =
+                    PostDetailFragmentDirections.actionPostDetailFragmentToPreviewFragment(
+                        mode = "edit", description = description,
+                        peopleNames = peopleNames, location = location, position= position.toString())
+                findNavController().navigate(action)
+
             }
 
         }

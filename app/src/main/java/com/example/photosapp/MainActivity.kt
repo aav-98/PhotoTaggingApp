@@ -116,7 +116,7 @@ class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
 
     private fun navigateToPreviewFragment(imageUri: Uri) {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
-        val action = HomeFragmentDirections.actionHomeFragmentToPreviewFragment(imageUri.toString())
+        val action = HomeFragmentDirections.actionHomeFragmentToPreviewFragment("new", photoURI = imageUri.toString())
         navController.navigate(action)
     }
 

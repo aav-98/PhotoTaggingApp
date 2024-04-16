@@ -143,7 +143,29 @@ class PhotoRepository(context: Context) {
         )
     }
 
-    fun updateTags(indexUpdateTag: String, updateTagDes: String, updateTagPho: String, updateTagLoc: String, updateTagPeopleName: String) {
+    fun updatePost(indexUpdateTag: String, updateTagDes: String, updateTagPho: String, updateTagLoc: String, updateTagPeopleName: String) {
+        val userId = sharedPref.getString(appContext.getString(R.string.user_id_key), null)
+        if (userId.isNullOrEmpty() || indexUpdateTag.isEmpty()) {
+            Log.d(TAG, "User ID or tag index is missing.")
+            return
+        }
+        val fileName = userId + indexUpdateTag
+
+        when {
+            //Only updating tags when the photo has not changed or the post is being deleted
+            updateTagPho.isEmpty() || updateTagPho == "na" -> {
+                updateTags(indexUpdateTag, updateTagDes, if (updateTagPho == "na") updateTagPho else fileName, updateTagLoc, updateTagPeopleName)
+            }
+            //Else attempt to upload the new photo and update the tags if that is successful
+            else -> {
+                uploadPhoto(userId, indexUpdateTag, fileName, updateTagPho,
+                    onSuccess = { updateTags(indexUpdateTag, updateTagDes, fileName, updateTagLoc, updateTagPeopleName) },
+                    onError = { Toast.makeText(appContext, "Could not change post", Toast.LENGTH_SHORT).show() }
+                )
+            }
+        }
+    }
+    private fun updateTags(indexUpdateTag: String, updateTagDes: String, updateTagPho: String, updateTagLoc: String, updateTagPeopleName: String) {
         val userId = sharedPref.getString(appContext.getString(R.string.user_id_key), null)
         if (userId != null ) {
             val queue = Volley.newRequestQueue(appContext)
@@ -310,13 +332,6 @@ class PhotoRepository(context: Context) {
     }
 
     private fun removePhoto(fileName: String) {
-        //I don't think i need this anymore
-        /*
-        with(sharedPref.edit()) {
-            remove(fileName)
-            apply()
-        }
-         */
         val currentPhotos = photoLiveData.value?.toMutableMap() ?: mutableMapOf()
         currentPhotos.remove(fileName)
         photoLiveData.postValue(currentPhotos)

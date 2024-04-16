@@ -42,21 +42,26 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //Setting up the recycle view for the pictures
+        val photosList = mutableListOf<Pair<String,Bitmap>>()
+        val adapter = PhotosAdapter(photosList, object : OnPhotoClickListener {
+            override fun onPhotoClick(photoFn : String) {
+                Log.d(TAG, "Photo with filename $photoFn clicked")
+                photosList.find { it.first == photoFn }?.second?.let { bitmap ->
+                    photoViewModel.setCurrentImageBitmap(bitmap)
+                }
+                val action =
+                    HomeFragmentDirections.actionHomeFragmentToPostDetailFragment(photoFn)
+                findNavController().navigate(action)
+            }
+        })
+        binding.photosRecyclerView.adapter = adapter
+        binding.photosRecyclerView.layoutManager = GridLayoutManager(context, 2)
+
         photoViewModel.tagsLiveData.observe(viewLifecycleOwner) { tags ->
             Log.d(TAG, "Tags observed changed")
             if (tags != null) {
                 photoViewModel.loadPhotos()
-                val photosList = mutableListOf<Pair<String,Bitmap>>()
-                val adapter = PhotosAdapter(photosList, object : OnPhotoClickListener {
-                    override fun onPhotoClick(photoFn : String) {
-                        Log.d(TAG, "Photo with filename $photoFn clicked")
-                        val action =
-                            HomeFragmentDirections.actionHomeFragmentToPostDetailFragment(photoFn)
-                        findNavController().navigate(action)
-                    }
-                })
-                binding.photosRecyclerView.adapter = adapter
-                binding.photosRecyclerView.layoutManager = GridLayoutManager(context, 2)
 
                 photoViewModel.photoLiveData.observe(viewLifecycleOwner) { photosMap ->
                     Log.d(TAG, "Photos observed changed")

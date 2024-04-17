@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,10 +24,13 @@ import androidx.core.view.children
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.gms.maps.model.LatLng
 import java.io.ByteArrayOutputStream
 
+//TODO: Find out how to make the app scroll/pan to the right edit box when keyboard is opened
+//TODO: Should the user be able to edit the Lat long to be what they want it to be?
 
-class PreviewFragment : Fragment() {
+class PreviewFragment : BaseMapFragment() {
 
     private var _binding: FragmentPreviewBinding? = null
     private val binding get() = _binding!!
@@ -48,9 +50,11 @@ class PreviewFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-
+    ): View {
         _binding = FragmentPreviewBinding.inflate(inflater, container, false)
+        mapView = _binding?.mapView
+        mapView?.onCreate(savedInstanceState)
+        mapView?.getMapAsync(this)
         return binding.root
 
     }
@@ -65,7 +69,7 @@ class PreviewFragment : Fragment() {
                 getPhotoLocation(uri)
             }
         } else {
-            binding.submitButton.text = "Submit changes"
+            binding.submitButton.text = getString(R.string.submit_changes_button_text)
             photoViewModel.currentPhotoDetails.value?.let {photoDetails ->
                 if (photoDetails.people != "") {
                     photoDetails.people.split(",").forEach { name ->
@@ -74,6 +78,16 @@ class PreviewFragment : Fragment() {
                 position = photoDetails.id
                 binding.imageDescriptionEditText.setText(photoDetails.description)
                 binding.locationView.text = photoDetails.location
+                val locationParts = photoDetails.location.split(",")
+                if (locationParts.size == 2) {
+                    try {
+                        val lat = locationParts[0].toDouble()
+                        val lng = locationParts[1].toDouble()
+                        queueLocationUpdate(LatLng(lat, lng))
+                    } catch (e: NumberFormatException) {
+                        Log.e(TAG, "Invalid location format", e)
+                    }
+                }
                 binding.imageView.setImageBitmap(photoDetails.photoBitmap)
                 imageBitMap = photoDetails.photoBitmap
 
@@ -125,7 +139,6 @@ class PreviewFragment : Fragment() {
                 val description = binding.imageDescriptionEditText.text.toString()
                 val location = binding.locationView.text.toString()
                 val people = binding.namesChipGroup.children
-                    .drop(1) //Placeholder chip
                     .map { it as Chip }
                     .joinToString(", ") { it.text.toString() }
 
@@ -152,21 +165,11 @@ class PreviewFragment : Fragment() {
             isCloseIconVisible = true
             setOnCloseIconClickListener {
                 (parent as? ChipGroup)?.removeView(this)
-                updatePlaceholderVisibility()
             }
         }
         binding.namesChipGroup.addView(chip)
-        updatePlaceholderVisibility()
     }
 
-    private fun updatePlaceholderVisibility() {
-        val chipCount = binding.namesChipGroup.childCount - 1
-        if (chipCount > 0) {
-            binding.placeholderChip.visibility = View.GONE
-        } else {
-            binding.placeholderChip.visibility = View.INVISIBLE
-        }
-    }
 
     private fun getPhotoLocation(photoUri: Uri) {
         try {
@@ -175,10 +178,13 @@ class PreviewFragment : Fragment() {
             val latLong = exifInterface?.latLong
 
             if (latLong != null) {
-                val lat = String.format("%.3f", latLong[0])
-                val long = String.format("%.3f", latLong[1])
-                binding.locationView.text = "Latitude: $lat, Longitude: $long"
+                val lat = latLong[0]
+                val long = latLong[1]
+                val locationText = String.format("%.3f", lat) + ", " + String.format("%.3f", long)
+                binding.locationView.text = locationText
+                queueLocationUpdate(LatLng(lat, long))
             } else {
+                mapView?.visibility = View.GONE
                 binding.locationView.text = "No location information available"
                 Log.d("Location", "This photo does not have GPS info.")
             }

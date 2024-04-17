@@ -5,6 +5,7 @@ xmlns:tools="http://schemas.android.com/tools"
 android:layout_width="match_parent"
 android:layout_height="match_parent"
 tools:context=".PreviewFragment">
+    <!--android:fitsSystemWindows="true" -->
 
     <ScrollView
         android:id="@+id/scrollView"
@@ -54,19 +55,43 @@ tools:context=".PreviewFragment">
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintWidth_percent="0.4"/>
 
+            <TextView
+                android:id="@+id/descriptionViewLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/editPhotoButton"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:text="Description"
+                android:textStyle="bold"
+                android:labelFor="@id/imageDescriptionEditText">
+
+            </TextView>
+
             <EditText
                 android:id="@+id/imageDescriptionEditText"
                 android:layout_width="0dp"
-                android:layout_height="80dp"
-                android:maxHeight="100dp"
+                android:layout_height="wrap_content"
                 android:hint="@string/caption_field_text"
                 android:layout_marginHorizontal="16dp"
-                app:layout_constraintTop_toBottomOf="@id/editPhotoButton"
+                app:layout_constraintTop_toBottomOf="@id/descriptionViewLabel"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:textSize="16sp"
-                android:gravity="top"
-                />
+                android:gravity="top" />
+
+            <TextView
+                android:id="@+id/peopleViewLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/imageDescriptionEditText"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:text="People in the photo"
+                android:textStyle="bold"
+                android:labelFor="@id/nameInputLayout">
+
+            </TextView>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/nameInputLayout"
@@ -74,9 +99,9 @@ tools:context=".PreviewFragment">
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="6dp"
                 android:layout_marginBottom="8dp"
-                app:layout_constraintTop_toBottomOf="@id/imageDescriptionEditText"
+                app:layout_constraintTop_toBottomOf="@id/peopleViewLabel"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/addNameButton"
                 app:layout_constraintWidth_percent="0.7">
@@ -95,11 +120,11 @@ tools:context=".PreviewFragment">
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="@string/add_button_text"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="6dp"
                 android:layout_marginBottom="8dp"
                 android:layout_marginStart="8dp"
                 android:backgroundTint="#6B383838"
-                app:layout_constraintTop_toBottomOf="@id/imageDescriptionEditText"
+                app:layout_constraintTop_toBottomOf="@id/peopleViewLabel"
                 app:layout_constraintStart_toEndOf="@id/nameInputLayout"
                 app:layout_constraintWidth_percent="0.2"/>
 
@@ -112,21 +137,26 @@ tools:context=".PreviewFragment">
                 app:layout_constraintTop_toBottomOf="@id/nameInputLayout"
                 app:singleLine="false">
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/placeholderChip"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="invisible"
-                    android:text="@string/placeholder_chip_text"
-                    style="@style/Widget.MaterialComponents.Chip.Entry" />
-
             </com.google.android.material.chip.ChipGroup>
+
+            <TextView
+                android:id="@+id/locationViewLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/namesChipGroup"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:text="Location"
+                android:labelFor="@id/locationView"
+                android:textStyle="bold">
+
+            </TextView>
 
             <TextView
                 android:id="@+id/locationView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/namesChipGroup"
+                app:layout_constraintTop_toBottomOf="@id/locationViewLabel"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="8dp"
                 android:textSize="16sp"
@@ -134,14 +164,15 @@ tools:context=".PreviewFragment">
 
             </TextView>
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="100dp"
+            <com.google.android.gms.maps.MapView
+                android:id="@+id/mapView"
+                android:layout_width="0dp"
+                android:layout_height="150dp"
                 app:layout_constraintTop_toBottomOf="@id/locationView"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginTop="16dp"
-                android:src="@drawable/location_placeholder"/>
+                android:layout_marginHorizontal="16dp" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
@@ -153,7 +184,7 @@ tools:context=".PreviewFragment">
         android:layout_height="wrap_content"
         android:text="@string/submit_button_text"
         android:layout_marginHorizontal="8dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginVertical="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

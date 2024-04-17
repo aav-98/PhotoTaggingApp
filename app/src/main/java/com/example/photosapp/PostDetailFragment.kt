@@ -2,16 +2,17 @@ package com.example.photosapp
 
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.photosapp.databinding.FragmentPostDetailBinding
+import com.google.android.gms.maps.model.LatLng
 
 
-class PostDetailFragment : Fragment() {
+class PostDetailFragment : BaseMapFragment() {
 
     private var _binding : FragmentPostDetailBinding? = null
     private val binding get() = _binding!!
@@ -20,11 +21,16 @@ class PostDetailFragment : Fragment() {
         PhotoViewModelFactory(requireActivity().applicationContext)
     }
 
+    private val TAG = javaClass.simpleName
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPostDetailBinding.inflate(inflater, container, false)
+        mapView = _binding?.mapView
+        mapView?.onCreate(savedInstanceState)
+        mapView?.getMapAsync(this)
         return binding.root
 
     }
@@ -35,7 +41,20 @@ class PostDetailFragment : Fragment() {
         photoViewModel.currentPhotoDetails.observe(viewLifecycleOwner) { photoDetails ->
             if (photoDetails.description != "") binding.descriptionView.text = photoDetails.description
             if (photoDetails.people != "") binding.peopleView.text = photoDetails.people
-            if (photoDetails.location != "") binding.locationView.text = photoDetails.location
+
+            if (photoDetails.location != "") {
+                binding.locationView.text = photoDetails.location
+                val locationParts = photoDetails.location.split(",")
+                if (locationParts.size == 2) {
+                    try {
+                        val lat = locationParts[0].toDouble()
+                        val lng = locationParts[1].toDouble()
+                        queueLocationUpdate(LatLng(lat, lng))
+                    } catch (e: NumberFormatException) {
+                        Log.e(TAG, "Invalid location format", e)
+                    }
+                }
+            }
             binding.imageView.setImageBitmap(photoDetails.photoBitmap)
 
 

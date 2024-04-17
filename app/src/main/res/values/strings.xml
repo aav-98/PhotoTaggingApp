@@ -54,5 +54,6 @@
     <!--Strings related to change password fragment -->
     <string name="old_password">Old Password</string>
     <string name="new_password">New Password</string>
+    <string name="submit_changes_button_text">Submit changes</string>
 
 </resources>

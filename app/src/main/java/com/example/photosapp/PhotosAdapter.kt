@@ -19,10 +19,10 @@ class PhotosAdapter(private val photos: List<Pair<String,Bitmap>>, private val c
     }
 
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
-        val (photoFn, bitmap) = photos[position]
+        val bitmap = photos[position].second
         holder.imageView.setImageBitmap(bitmap)
         holder.itemView.setOnClickListener {
-            clickListener.onPhotoClick(photoFn)
+            clickListener.onPhotoClick(position)
         }
     }
 

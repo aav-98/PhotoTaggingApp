@@ -56,7 +56,6 @@
         android:name="com.example.photosapp.PreviewFragment"
         android:label=" "
         tools:layout="@layout/fragment_preview">
-        <!-- New posts -->
         <argument
             android:name="mode"
             app:argType="string" />
@@ -64,23 +63,6 @@
             android:name="photoURI"
             app:argType="string"
             android:defaultValue=""/>
-        <argument
-            android:name="description"
-            app:argType="string"
-            android:defaultValue=""/>
-        <argument
-            android:name="peopleNames"
-            app:argType="string"
-            android:defaultValue=""/>
-        <argument
-            android:name="location"
-            app:argType="string"
-            android:defaultValue=""/>
-        <argument
-            android:name="position"
-            app:argType="string"
-            android:defaultValue=""/>
-
         <action
             android:id="@+id/action_PreviewFragment_to_HomeFragment"
             app:destination="@id/HomeFragment" />
@@ -94,9 +76,6 @@
         android:name="com.example.photosapp.PostDetailFragment"
         android:label=" "
         tools:layout="@layout/fragment_post_detail" >
-        <argument
-            android:name="photoFn"
-            app:argType="string"/>
         <action
             android:id="@+id/action_PostDetailFragment_to_PreviewFragment"
             app:destination="@id/PreviewFragment" />

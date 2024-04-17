@@ -1,11 +1,11 @@
 package com.example.photosapp
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.photosapp.data.PhotoRepository
+import com.example.photosapp.data.model.PhotoDetails
 import com.example.photosapp.data.model.Tags
 
 class PhotoViewModel(private val photoRepository: PhotoRepository) : ViewModel() {
@@ -14,12 +14,8 @@ class PhotoViewModel(private val photoRepository: PhotoRepository) : ViewModel()
     val tagsLiveData: LiveData<Tags?> = photoRepository.tagsLiveData
     val photoLiveData: LiveData<Map<String, String>> = photoRepository.photoLiveData
 
-    private val _imageBitmap = MutableLiveData<Bitmap>()
-    val currentImageBitmap: LiveData<Bitmap> = _imageBitmap
-
-    fun setCurrentImageBitmap(bitmap: Bitmap) {
-        _imageBitmap.value = bitmap
-    }
+    private val _photoDetails = MutableLiveData<PhotoDetails>()
+    val currentPhotoDetails: LiveData<PhotoDetails> = _photoDetails
 
     fun loadTags() {
         photoRepository.getTags()
@@ -35,9 +31,7 @@ class PhotoViewModel(private val photoRepository: PhotoRepository) : ViewModel()
         photoRepository.updatePost(position, newTagDes, newTagPho, newTagLoc, newTagPeopleName)
     }
 
-
-
-
-
-
+    fun setCurrentPhotoDetails(id: String, bitmap: Bitmap, des: String, loc: String, people: String) {
+        _photoDetails.value = PhotoDetails(id, bitmap, des, loc, people)
+    }
 }

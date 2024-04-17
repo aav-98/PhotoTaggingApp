@@ -10,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.photosapp.databinding.FragmentHomeBinding
@@ -32,8 +31,7 @@ class HomeFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-
+    ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
 
@@ -45,13 +43,19 @@ class HomeFragment : Fragment() {
         //Setting up the recycle view for the pictures
         val photosList = mutableListOf<Pair<String,Bitmap>>()
         val adapter = PhotosAdapter(photosList, object : OnPhotoClickListener {
-            override fun onPhotoClick(photoFn : String) {
-                Log.d(TAG, "Photo with filename $photoFn clicked")
-                photosList.find { it.first == photoFn }?.second?.let { bitmap ->
-                    photoViewModel.setCurrentImageBitmap(bitmap)
+            override fun onPhotoClick(position : Int) {
+                val tags = photoViewModel.tagsLiveData.value
+                if (tags != null) {
+                    val bitmap = photosList[position].second
+                    val description = tags.tagDes[position]
+                    val peopleNames = tags.tagPeopleName[position]
+                    val location = tags.tagLocation[position]
+
+                    photoViewModel.setCurrentPhotoDetails(position.toString(), bitmap, description, location, peopleNames)
+
                 }
                 val action =
-                    HomeFragmentDirections.actionHomeFragmentToPostDetailFragment(photoFn)
+                    HomeFragmentDirections.actionHomeFragmentToPostDetailFragment()
                 findNavController().navigate(action)
             }
         })

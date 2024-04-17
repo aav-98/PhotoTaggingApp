@@ -24,6 +24,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.children
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import java.io.ByteArrayOutputStream
 
 
@@ -37,15 +38,12 @@ class PreviewFragment : Fragment() {
     }
 
     private lateinit var pickImageLauncher: ActivityResultLauncher<String>
-
+    private val args: PreviewFragmentArgs by navArgs()
     private val TAG = javaClass.simpleName
 
     private var imageBitMap: Bitmap? = null
-
     private var photoChange = false
-    private var mode = "new"
     private var position = ""
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -60,33 +58,26 @@ class PreviewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        arguments?.let {
-            val args = PreviewFragmentArgs.fromBundle(it)
-            mode = args.mode
-            if (mode == "new") {
-                Log.d("BUG_FIX", "PREVIEW MODE: NEW PHOTO")
-                val imageUri = Uri.parse(args.photoURI)
-
-                imageUri?.let { uri ->
-                    imageBitMap = uriToBitmap(uri)
-                    binding.imageView.setImageBitmap(imageBitMap)
-                    getPhotoLocation(uri)
-                }
-            } else {
-                Log.d("BUG_FIX", "PREVIEW MODE: EDITING EXISTING PHOTO")
-                if (args.peopleNames != "") {
-                    args.peopleNames.split(",").forEach { name ->
-                        addChipToGroup(name)
-                }   }
-                position = args.position
-                binding.imageDescriptionEditText.setText(args.description)
-                binding.locationView.text = args.location
-                photoViewModel.currentImageBitmap.observe(viewLifecycleOwner) {bitmap ->
-                    binding.imageView.setImageBitmap(bitmap)
-                    imageBitMap = bitmap
-                }
+        if (args.mode == "new") {
+            Uri.parse(args.photoURI)?.let { uri ->
+                imageBitMap = uriToBitmap(uri)
+                binding.imageView.setImageBitmap(imageBitMap)
+                getPhotoLocation(uri)
             }
+        } else {
+            binding.submitButton.text = "Submit changes"
+            photoViewModel.currentPhotoDetails.value?.let {photoDetails ->
+                if (photoDetails.people != "") {
+                    photoDetails.people.split(",").forEach { name ->
+                        addChipToGroup(name)
+                    }   }
+                position = photoDetails.id
+                binding.imageDescriptionEditText.setText(photoDetails.description)
+                binding.locationView.text = photoDetails.location
+                binding.imageView.setImageBitmap(photoDetails.photoBitmap)
+                imageBitMap = photoDetails.photoBitmap
 
+            }
         }
 
         binding.nameEditText.setOnEditorActionListener { textView, actionId, event ->
@@ -127,10 +118,10 @@ class PreviewFragment : Fragment() {
         }
         */
 
-
         binding.submitButton.setOnClickListener {
             imageBitMap?. let { bitmap ->
                 val imageBase64 = bitmapToBase64(bitmap)
+
                 val description = binding.imageDescriptionEditText.text.toString()
                 val location = binding.locationView.text.toString()
                 val people = binding.namesChipGroup.children
@@ -138,9 +129,10 @@ class PreviewFragment : Fragment() {
                     .map { it as Chip }
                     .joinToString(", ") { it.text.toString() }
 
-                if (mode == "new") photoViewModel.publishPost(imageBase64, description, location, people)
+                if (args.mode == "new") {
+                    photoViewModel.publishPost(imageBase64, description, location, people)
+                }
                 else {
-                    Log.d("UPDATING_FIX", "Not new so i am updating the tags and photo")
                     if (photoChange) photoViewModel.updatePost(position, description, imageBase64, location, people)
                     else photoViewModel.updatePost(position, description, "", location, people)
                 }
@@ -187,6 +179,7 @@ class PreviewFragment : Fragment() {
                 val long = String.format("%.3f", latLong[1])
                 binding.locationView.text = "Latitude: $lat, Longitude: $long"
             } else {
+                binding.locationView.text = "No location information available"
                 Log.d("Location", "This photo does not have GPS info.")
             }
         } catch (e: IOException) {
@@ -206,16 +199,7 @@ class PreviewFragment : Fragment() {
 
     private fun bitmapToBase64(bitmap: Bitmap): String {
         val outputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
         return Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT)
-    }
-
-    private fun String.toBitmap(): Bitmap? {
-        return try {
-            val bytes = Base64.decode(this, Base64.DEFAULT)
-            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-        } catch (e: IllegalArgumentException) {
-            null
-        }
     }
 }

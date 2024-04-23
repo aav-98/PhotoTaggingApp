@@ -45,18 +45,11 @@ class HomeFragment : Fragment() {
         val photosList = mutableListOf<Pair<String,Bitmap>>()
         val adapter = PhotosAdapter(photosList, object : OnPhotoClickListener {
             override fun onPhotoClick(position : Int) {
-                val tags = photoViewModel.tagsLiveData.value
-                if (tags != null) {
-                    val bitmap = photosList[position].second
-                    val description = tags.tagDes[position]
-                    val peopleNames = tags.tagPeopleName[position]
-                    val location = tags.tagLocation[position]
-
-                    photoViewModel.setCurrentPhotoDetails(PhotoDetails(position.toString(), description, location, peopleNames))
-                    photoViewModel.setCurrentPhoto(bitmap)
-                }
+                val bitmap = photosList[position].second
+                photoViewModel.setCurrentPhoto(bitmap)
+                photoViewModel.setEditedPhoto(bitmap)
                 val action =
-                    HomeFragmentDirections.actionHomeFragmentToPostDetailFragment()
+                    HomeFragmentDirections.actionHomeFragmentToPostDetailFragment(position)
                 findNavController().navigate(action)
             }
         })

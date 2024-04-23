@@ -20,6 +20,9 @@ class PhotoViewModel(private val photoRepository: PhotoRepository) : ViewModel()
     private val _currentPhoto = MutableLiveData<Bitmap>()
     val currentPhoto: LiveData<Bitmap> = _currentPhoto
 
+    private val _editedPhoto = MutableLiveData<Bitmap?>()
+    val editedPhoto: LiveData<Bitmap?> = _editedPhoto
+
     fun loadTags() {
         photoRepository.getTags()
     }
@@ -41,5 +44,15 @@ class PhotoViewModel(private val photoRepository: PhotoRepository) : ViewModel()
     fun setCurrentPhoto(bitmapImage: Bitmap) {
         _currentPhoto.value = bitmapImage
     }
+
+    fun setEditedPhoto(bitmapImage: Bitmap) {
+        _editedPhoto.value = bitmapImage
+    }
+
+    fun discardPhotoChanges() {
+        _editedPhoto.value = null
+    }
+
+
 
 }

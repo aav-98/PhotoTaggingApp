@@ -12,8 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import com.example.photosapp.databinding.FragmentPreviewBinding
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import java.io.IOException
 
 import android.graphics.Bitmap
@@ -68,7 +66,7 @@ class PreviewFragment : BaseMapFragment() {
             Uri.parse(args.photoURI)?.let { uri ->
                 imageBitMap = uriToBitmap(uri)
                 binding.imageView.setImageBitmap(imageBitMap)
-                photoViewModel.setCurrentPhoto(imageBitMap as Bitmap)
+                photoViewModel.setEditedPhoto(imageBitMap as Bitmap)
                 getPhotoLocation(uri)
             }
         }
@@ -77,10 +75,7 @@ class PreviewFragment : BaseMapFragment() {
             if (args.mode == "editEdit") photoChange = true
             Log.d(TAG, "er jeg gammel")
             photoViewModel.currentPhotoDetails.value?.let {photoDetails ->
-                if (photoDetails.people != "") {
-                    photoDetails.people.split(",").forEach { name ->
-                        addChipToGroup(name)
-                    }   }
+                binding.peopleEditText.setText(photoDetails.people)
                 position = photoDetails.id
                 binding.imageDescriptionEditText.setText(photoDetails.description)
                 binding.locationView.text = photoDetails.location
@@ -95,31 +90,13 @@ class PreviewFragment : BaseMapFragment() {
                     }
                 }
                 Log.d(TAG, "KOM DU HIT nr1")
-                photoViewModel.currentPhoto.value?.let { bitmap ->
+                photoViewModel.editedPhoto.value?.let { bitmap ->
                     Log.d(TAG, "KOM DU HIT nr2")
                     binding.imageView.setImageBitmap(bitmap)
                     imageBitMap = bitmap
                 }
             }
         }
-
-        binding.nameEditText.setOnEditorActionListener { textView, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_DONE ||
-                event?.action == KeyEvent.ACTION_DOWN &&
-                event.keyCode == KeyEvent.KEYCODE_ENTER) {
-                addChipToGroup(textView.text.toString())
-                textView.text = ""
-                true
-            } else {
-                false
-            }
-        }
-
-        binding.addNameButton.setOnClickListener {
-            addChipToGroup(binding.nameEditText.text.toString())
-            binding.nameEditText.text = null
-        }
-
 
         pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
@@ -137,26 +114,23 @@ class PreviewFragment : BaseMapFragment() {
         binding.editPhotoButton.setOnClickListener {
             val description = binding.imageDescriptionEditText.text.toString()
             val location = binding.locationView.text.toString()
-            val people = binding.namesChipGroup.children
-                .map { it as Chip }
-                .joinToString(", ") { it.text.toString() }
+            val people = binding.peopleEditText.text.toString()
 
             photoViewModel.setCurrentPhotoDetails(PhotoDetails(position.toString(), description, location, people))
 
-            photoViewModel.setCurrentPhoto(imageBitMap as Bitmap)
+            photoViewModel.setEditedPhoto(imageBitMap as Bitmap)
             val action = PreviewFragmentDirections.actionPreviewFragmentToEditPhotoFragment(args.mode)
             findNavController().navigate(action)
         }
 
         binding.submitButton.setOnClickListener {
+            photoViewModel.setCurrentPhoto(imageBitMap as Bitmap)
             imageBitMap?. let { bitmap ->
                 val imageBase64 = bitmapToBase64(bitmap)
 
                 val description = binding.imageDescriptionEditText.text.toString()
                 val location = binding.locationView.text.toString()
-                val people = binding.namesChipGroup.children
-                    .map { it as Chip }
-                    .joinToString(", ") { it.text.toString() }
+                val people = binding.peopleEditText.text.toString()
 
                 if (args.mode == "new" || args.mode == "newEdit") {
                     photoViewModel.publishPost(imageBase64, description, location, people)
@@ -175,16 +149,6 @@ class PreviewFragment : BaseMapFragment() {
         _binding = null
     }
 
-    private fun addChipToGroup(chipText: String) {
-        val chip = Chip(context).apply {
-            text = chipText
-            isCloseIconVisible = true
-            setOnCloseIconClickListener {
-                (parent as? ChipGroup)?.removeView(this)
-            }
-        }
-        binding.namesChipGroup.addView(chip)
-    }
 
 
     private fun getPhotoLocation(photoUri: Uri) {

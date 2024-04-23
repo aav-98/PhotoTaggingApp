@@ -78,7 +78,7 @@ class EditPhotoFragment : Fragment(), CropImageView.OnCropImageCompleteListener 
             handleToolSelection(selectedTool)
         }
 
-        photoViewModel.currentPhoto.value?.let {bitmap ->
+        photoViewModel.editedPhoto.value?.let {bitmap ->
             imageBitMap = bitmap
             binding.image.setImageBitmap(imageBitMap)
             Log.d(TAG, "Image has been set")
@@ -86,15 +86,10 @@ class EditPhotoFragment : Fragment(), CropImageView.OnCropImageCompleteListener 
 
         binding.saveButton.setOnClickListener {
             Log.d(TAG, "Save button clicked")
-            imageBitMap?.let {photoViewModel.setCurrentPhoto(imageBitMap as Bitmap)}
+            imageBitMap?.let {photoViewModel.setEditedPhoto(imageBitMap as Bitmap)}
             if (args.mode == "new") findNavController().navigate(EditPhotoFragmentDirections.actionEditPhotoFragmentToPreviewFragment("newEdit"))
             else findNavController().navigate(EditPhotoFragmentDirections.actionEditPhotoFragmentToPreviewFragment("editEdit"))
         }
-
-        binding.cancelButton.setOnClickListener {
-            findNavController().popBackStack()
-        }
-
     }
 
     override fun onDestroyView() {

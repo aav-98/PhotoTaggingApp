@@ -79,6 +79,9 @@
         android:name="com.example.photosapp.PostDetailFragment"
         android:label=" "
         tools:layout="@layout/fragment_post_detail" >
+        <argument
+            android:name="position"
+            app:argType="integer" />
         <action
             android:id="@+id/action_PostDetailFragment_to_PreviewFragment"
             app:destination="@id/PreviewFragment" />
@@ -113,7 +116,8 @@
             app:argType="string" />
         <action
             android:id="@+id/action_editPhotoFragment_to_PreviewFragment"
-            app:destination="@id/PreviewFragment" />
+            app:destination="@id/PreviewFragment"
+            app:popUpTo="@id/PostDetailFragment" />
     </fragment>
 
 </navigation>

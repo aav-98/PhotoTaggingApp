@@ -68,4 +68,9 @@ dependencies {
     // Google Maps
     implementation ("com.google.android.gms:play-services-maps:18.0.2")
     implementation ("com.google.android.gms:play-services-location:19.0.1")
+
+    //edit photos
+    implementation("com.vanniktech:android-image-cropper:4.5.0")
+    implementation("jp.co.cyberagent.android:gpuimage:2.1.0")
+
 }

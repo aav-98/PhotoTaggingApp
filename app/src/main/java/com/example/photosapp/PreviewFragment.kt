@@ -24,6 +24,7 @@ import androidx.core.view.children
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.example.photosapp.data.model.PhotoDetails
 import com.google.android.gms.maps.model.LatLng
 import java.io.ByteArrayOutputStream
 
@@ -63,13 +64,18 @@ class PreviewFragment : BaseMapFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         if (args.mode == "new") {
+            Log.d(TAG, "er jeg new")
             Uri.parse(args.photoURI)?.let { uri ->
                 imageBitMap = uriToBitmap(uri)
                 binding.imageView.setImageBitmap(imageBitMap)
+                photoViewModel.setCurrentPhoto(imageBitMap as Bitmap)
                 getPhotoLocation(uri)
             }
-        } else {
-            binding.submitButton.text = getString(R.string.submit_changes_button_text)
+        }
+        else {
+            if (args.mode != "newEdit") binding.submitButton.text = getString(R.string.submit_changes_button_text)
+            if (args.mode == "editEdit") photoChange = true
+            Log.d(TAG, "er jeg gammel")
             photoViewModel.currentPhotoDetails.value?.let {photoDetails ->
                 if (photoDetails.people != "") {
                     photoDetails.people.split(",").forEach { name ->
@@ -88,9 +94,12 @@ class PreviewFragment : BaseMapFragment() {
                         Log.e(TAG, "Invalid location format", e)
                     }
                 }
-                binding.imageView.setImageBitmap(photoDetails.photoBitmap)
-                imageBitMap = photoDetails.photoBitmap
-
+                Log.d(TAG, "KOM DU HIT nr1")
+                photoViewModel.currentPhoto.value?.let { bitmap ->
+                    Log.d(TAG, "KOM DU HIT nr2")
+                    binding.imageView.setImageBitmap(bitmap)
+                    imageBitMap = bitmap
+                }
             }
         }
 
@@ -125,12 +134,19 @@ class PreviewFragment : BaseMapFragment() {
             pickImageLauncher.launch("image/*")
         }
 
-        /*
-        //TODO: Handle the logic of editing a photo
         binding.editPhotoButton.setOnClickListener {
+            val description = binding.imageDescriptionEditText.text.toString()
+            val location = binding.locationView.text.toString()
+            val people = binding.namesChipGroup.children
+                .map { it as Chip }
+                .joinToString(", ") { it.text.toString() }
 
+            photoViewModel.setCurrentPhotoDetails(PhotoDetails(position.toString(), description, location, people))
+
+            photoViewModel.setCurrentPhoto(imageBitMap as Bitmap)
+            val action = PreviewFragmentDirections.actionPreviewFragmentToEditPhotoFragment(args.mode)
+            findNavController().navigate(action)
         }
-        */
 
         binding.submitButton.setOnClickListener {
             imageBitMap?. let { bitmap ->
@@ -142,7 +158,7 @@ class PreviewFragment : BaseMapFragment() {
                     .map { it as Chip }
                     .joinToString(", ") { it.text.toString() }
 
-                if (args.mode == "new") {
+                if (args.mode == "new" || args.mode == "newEdit") {
                     photoViewModel.publishPost(imageBase64, description, location, people)
                 }
                 else {

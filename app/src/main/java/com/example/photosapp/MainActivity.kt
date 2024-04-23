@@ -75,6 +75,9 @@ class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
                 supportActionBar?.setDisplayHomeAsUpEnabled(false)
                 binding.addButton.visibility = View.GONE
                 binding.profileButton.visibility = View.GONE
+            } else if (destination.id == R.id.editPhotoFragment) {
+                supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                supportActionBar?.setDisplayShowTitleEnabled(false)
             }
             else {
                 supportActionBar?.setDisplayHomeAsUpEnabled(true)

@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.photosapp.data.model.PhotoDetails
 import com.example.photosapp.databinding.FragmentHomeBinding
 
 /**
@@ -51,8 +52,8 @@ class HomeFragment : Fragment() {
                     val peopleNames = tags.tagPeopleName[position]
                     val location = tags.tagLocation[position]
 
-                    photoViewModel.setCurrentPhotoDetails(position.toString(), bitmap, description, location, peopleNames)
-
+                    photoViewModel.setCurrentPhotoDetails(PhotoDetails(position.toString(), description, location, peopleNames))
+                    photoViewModel.setCurrentPhoto(bitmap)
                 }
                 val action =
                     HomeFragmentDirections.actionHomeFragmentToPostDetailFragment()

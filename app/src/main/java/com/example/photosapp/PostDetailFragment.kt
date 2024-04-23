@@ -55,7 +55,7 @@ class PostDetailFragment : BaseMapFragment() {
                     }
                 }
             }
-            binding.imageView.setImageBitmap(photoDetails.photoBitmap)
+            binding.imageView.setImageBitmap(photoViewModel.currentPhoto.value)
 
 
             binding.deleteButton.setOnClickListener {

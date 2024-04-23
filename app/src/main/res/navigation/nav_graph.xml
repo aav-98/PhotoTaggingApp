@@ -66,6 +66,9 @@
         <action
             android:id="@+id/action_PreviewFragment_to_HomeFragment"
             app:destination="@id/HomeFragment" />
+        <action
+            android:id="@+id/action_PreviewFragment_to_editPhotoFragment"
+            app:destination="@id/editPhotoFragment" />
     </fragment>
 
     <action
@@ -100,7 +103,17 @@
         android:label="activity_main"
         tools:layout="@layout/activity_main">
     </activity>
-
-
+    <fragment
+        android:id="@+id/editPhotoFragment"
+        android:name="com.example.photosapp.EditPhotoFragment"
+        android:label="fragment_edit_photo"
+        tools:layout="@layout/fragment_edit_photo">
+        <argument
+            android:name="mode"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_editPhotoFragment_to_PreviewFragment"
+            app:destination="@id/PreviewFragment" />
+    </fragment>
 
 </navigation>

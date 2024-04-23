@@ -17,6 +17,9 @@ class PhotoViewModel(private val photoRepository: PhotoRepository) : ViewModel()
     private val _photoDetails = MutableLiveData<PhotoDetails>()
     val currentPhotoDetails: LiveData<PhotoDetails> = _photoDetails
 
+    private val _currentPhoto = MutableLiveData<Bitmap>()
+    val currentPhoto: LiveData<Bitmap> = _currentPhoto
+
     fun loadTags() {
         photoRepository.getTags()
     }
@@ -31,7 +34,12 @@ class PhotoViewModel(private val photoRepository: PhotoRepository) : ViewModel()
         photoRepository.updatePost(position, newTagDes, newTagPho, newTagLoc, newTagPeopleName)
     }
 
-    fun setCurrentPhotoDetails(id: String, bitmap: Bitmap, des: String, loc: String, people: String) {
-        _photoDetails.value = PhotoDetails(id, bitmap, des, loc, people)
+    fun setCurrentPhotoDetails(photoDetail : PhotoDetails) {
+        _photoDetails.value = photoDetail
     }
+
+    fun setCurrentPhoto(bitmapImage: Bitmap) {
+        _currentPhoto.value = bitmapImage
+    }
+
 }

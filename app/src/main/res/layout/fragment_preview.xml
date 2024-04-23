@@ -89,61 +89,29 @@ tools:context=".PreviewFragment">
                 android:layout_marginTop="16dp"
                 android:text="People in the photo"
                 android:textStyle="bold"
-                android:labelFor="@id/nameInputLayout">
+                android:labelFor="@id/peopleEditText">
 
             </TextView>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/nameInputLayout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+            <EditText
+                android:id="@+id/peopleEditText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="6dp"
-                android:layout_marginBottom="8dp"
+                android:hint="@string/tag_field_text"
+                android:layout_marginHorizontal="16dp"
                 app:layout_constraintTop_toBottomOf="@id/peopleViewLabel"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/addNameButton"
-                app:layout_constraintWidth_percent="0.7">
+                app:layout_constraintEnd_toEndOf="parent"
+                android:textSize="16sp"
+                android:gravity="top" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/nameEditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/tag_field_text"
-                    android:inputType="text"
-                    android:textSize="15sp"/>
-            </com.google.android.material.textfield.TextInputLayout>
 
-            <Button
-                android:id="@+id/addNameButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="@string/add_button_text"
-                android:layout_marginTop="6dp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginStart="8dp"
-                android:backgroundTint="#6B383838"
-                app:layout_constraintTop_toBottomOf="@id/peopleViewLabel"
-                app:layout_constraintStart_toEndOf="@id/nameInputLayout"
-                app:layout_constraintWidth_percent="0.2"/>
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/namesChipGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                app:chipSpacingVertical="0dp"
-                app:layout_constraintTop_toBottomOf="@id/nameInputLayout"
-                app:singleLine="false">
-
-            </com.google.android.material.chip.ChipGroup>
 
             <TextView
                 android:id="@+id/locationViewLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/namesChipGroup"
+                app:layout_constraintTop_toBottomOf="@id/peopleEditText"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="16dp"
                 android:text="Location"

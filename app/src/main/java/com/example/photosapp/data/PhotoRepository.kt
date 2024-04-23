@@ -343,4 +343,9 @@ class PhotoRepository(context: Context) {
         return photoFilenames.indexOfFirst { it == "na" }
     }
 
+    val currentPhotoLiveData = MutableLiveData<Tags?>()
+    fun saveCurrentPhotoInformation(newTagDes: String, newTagLoc: String, newTagPeopleName: String) {
+
+    }
+
 }

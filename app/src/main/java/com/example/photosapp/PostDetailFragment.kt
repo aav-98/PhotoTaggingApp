@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import com.example.photosapp.data.model.PhotoDetails
 import com.example.photosapp.databinding.FragmentPostDetailBinding
 import com.google.android.gms.maps.model.LatLng
 
@@ -20,6 +22,7 @@ class PostDetailFragment : BaseMapFragment() {
     private val photoViewModel: PhotoViewModel by activityViewModels {
         PhotoViewModelFactory(requireActivity().applicationContext)
     }
+    private val args: PostDetailFragmentArgs by navArgs()
 
     private val TAG = javaClass.simpleName
 
@@ -38,28 +41,33 @@ class PostDetailFragment : BaseMapFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        photoViewModel.currentPhotoDetails.observe(viewLifecycleOwner) { photoDetails ->
-            if (photoDetails.description != "") binding.descriptionView.text = photoDetails.description
-            if (photoDetails.people != "") binding.peopleView.text = photoDetails.people
+        val position = args.position
+        val tags = photoViewModel.tagsLiveData.value
+        if (tags != null) {
+            val description = tags.tagDes[position]
+            val peopleNames = tags.tagPeopleName[position]
+            val location = tags.tagLocation[position]
 
-            if (photoDetails.location != "") {
-                binding.locationView.text = photoDetails.location
-                val locationParts = photoDetails.location.split(",")
-                if (locationParts.size == 2) {
-                    try {
-                        val lat = locationParts[0].toDouble()
-                        val lng = locationParts[1].toDouble()
-                        queueLocationUpdate(LatLng(lat, lng))
-                    } catch (e: NumberFormatException) {
-                        Log.e(TAG, "Invalid location format", e)
-                    }
+            photoViewModel.setCurrentPhotoDetails(PhotoDetails(position.toString(), description, location, peopleNames))
+
+            binding.descriptionView.text = description
+            binding.peopleView.text = peopleNames
+            binding.locationView.text = location
+            val locationParts = location.split(",")
+            if (locationParts.size == 2) {
+                try {
+                    val lat = locationParts[0].toDouble()
+                    val lng = locationParts[1].toDouble()
+                    queueLocationUpdate(LatLng(lat, lng))
+                } catch (e: NumberFormatException) {
+                    Log.e(TAG, "Invalid location format", e)
                 }
             }
-            binding.imageView.setImageBitmap(photoDetails.photoBitmap)
 
+            binding.imageView.setImageBitmap(photoViewModel.currentPhoto.value)
 
             binding.deleteButton.setOnClickListener {
-                photoViewModel.updatePost(photoDetails.id, "na", "na", "na", "na")
+                photoViewModel.updatePost(position.toString(), "na", "na", "na", "na")
                 findNavController().navigate(R.id.action_PostDetailFragment_to_HomeFragment)
             }
 
@@ -69,6 +77,7 @@ class PostDetailFragment : BaseMapFragment() {
                 findNavController().navigate(action)
 
             }
+
         }
     }
 

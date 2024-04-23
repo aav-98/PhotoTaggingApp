@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EditPhotoFragment">
+
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="Save"
+        android:layout_alignParentEnd="true">
+    </Button>
+
+    <Button
+        android:id="@+id/cropButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Crop"
+        android:layout_alignParentEnd="true"
+        android:visibility="gone" >
+    </Button>
+
+    <Button
+        android:id="@+id/doneButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Done"
+        android:layout_alignParentEnd="true"
+        android:visibility="gone" >
+    </Button>
+
+    <Button
+        android:id="@+id/brightnessDoneButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Done"
+        android:layout_alignParentEnd="true"
+        android:visibility="gone" >
+    </Button>
+
+    <Button
+        android:id="@+id/contrastDoneButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Done"
+        android:layout_alignParentEnd="true"
+        android:visibility="gone" >
+    </Button>
+
+    <Button
+        android:id="@+id/saturationDoneButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Done"
+        android:layout_alignParentEnd="true"
+        android:visibility="gone" >
+    </Button>
+
+    <ImageButton
+        android:id="@+id/rotateButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/outline_rotate_right_black_24"
+        android:background="?attr/selectableItemBackground"
+        android:padding="8dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:visibility="gone">
+    </ImageButton>
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="500dp"
+        android:layout_above="@id/toolsRecyclerView"
+        android:layout_below="@id/saveButton"
+        android:scaleType="fitCenter" >
+    </ImageView>
+
+    <com.canhub.cropper.CropImageView
+        android:id="@+id/cropImageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/saveButton"
+        android:scaleType="fitCenter"
+        android:visibility="gone" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/gpuImageLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/saveButton"
+        app:gpuimage_surface_type="surface_view"
+        android:visibility="gone">
+        
+        <android.opengl.GLSurfaceView
+            android:id="@+id/glSurfaceView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/adjustmentSeekBar"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <SeekBar
+            android:id="@+id/adjustmentSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/glSurfaceView"
+            app:layout_constraintBottom_toBottomOf="parent"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/toolsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager">
+    </androidx.recyclerview.widget.RecyclerView>
+
+
+
+</RelativeLayout>

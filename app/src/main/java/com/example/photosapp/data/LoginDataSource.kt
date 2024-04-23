@@ -15,20 +15,6 @@ import com.example.photosapp.data.Result
 import com.example.photosapp.ui.login.LoginResult
 
 /**
- * Interface that will be used for callbacks when the login request is completed
- */
-interface LoginResultCallback {
-    fun onResult(result: LoginResult)
-}
-
-/**
- * Interface that will be used for callbacks when the change password request is completed
- */
-interface ChangePasswordResultCallback {
-    fun onResult(result: Result<String>)
-}
-
-/**
  * Class that handles authentication w/ login credentials and retrieves user information.
  */
 class LoginDataSource(context: Context) {
@@ -41,18 +27,34 @@ class LoginDataSource(context: Context) {
 
     private val queue = Volley.newRequestQueue(appContext)
 
+    /**
+     * Initiates a login request to authenticate a user.
+     *
+     * This function sends a POST request to a predefined server URL to authenticate a user using
+     * their username and password. Upon receiving a response, it parses the JSON response into
+     * a `LoggedInUser` object if successful, or handles errors accordingly.
+     *
+     * @param username The username of the user attempting to log in.
+     * @param password The password of the user, which will be hashed using MD5 before sending.
+     * @param callback A callback interface through which results are returned. Results include successful
+     *                 user login data or error information in case of failure.
+     *
+     * Error Handling:
+     * - On a successful HTTP response containing non-empty content, the JSON is parsed into a `LoggedInUser`.
+     * - On empty response or network errors, the callback is invoked with an error.
+     *
+     */
     fun login(username: String, password: String, callback: LoginResultCallback) {
 
-        val url = "http://10.0.2.2:8080/methodPostRemoteLogin"
+        val url = "http://10.0.2.2:8080/methodPostRemoteLogin" //points to a local server, particularly used for testing purposes when running the server locally on the same machine as the emulator.
 
         val hashedPassword = md5(password)
 
         val stringRequest = object : StringRequest(
             Method.POST, url,
             Response.Listener<String> { response ->
-                Log.d(TAG, response)
+                //Log.d(TAG, response)
                 if (response != "") {
-                    Log.d("LOGIN", "API call successful")
                     val gson = Gson()
                     val user: LoggedInUser = gson.fromJson(response, LoggedInUser::class.java)
                     callback.onResult(LoginResult(success = user))
@@ -75,6 +77,12 @@ class LoginDataSource(context: Context) {
         queue.add(stringRequest)
     }
 
+    /**
+     * Invoked when user chooses to log out of application
+     *
+     * This function clears the user information and corresponding photos stored in Shared Preferences.
+     *
+     */
     fun logout() {
         sharedPreferences.edit().clear().apply()
         with (sharedPreferences.edit()) {
@@ -83,12 +91,32 @@ class LoginDataSource(context: Context) {
         }
     }
 
-    private fun md5(input: String): String {
+    /**
+     * This function hashes the cleartext using the MD5 hashing algorithm
+     *
+     * @param password The password of the user
+     */
+    private fun md5(password: String): String {
         val md = MessageDigest.getInstance("MD5")
-        val hash = BigInteger(1, md.digest(input.toByteArray(Charsets.UTF_8)))
+        val hash = BigInteger(1, md.digest(password.toByteArray(Charsets.UTF_8)))
         return String.format("%032x", hash)
     }
 
+    /**
+     * Submits a request to change the user's password on the server.
+     *
+     * This function sends a POST request to change the password of the user identified by an email
+     * stored in SharedPreferences. The function listens for a response to determine whether the
+     * password change was successful or if an error occurred.
+     *
+     * @param newPassword The new password the user wants to set, which will be hashed using MD5 before sending.
+     * @param callback A callback interface through which results are returned. Results include
+     * success or error information.
+     *
+     * Error Handling:
+     * - The server is expected to return "OK" if the password change is successful. Any other response or network errors
+     *   will trigger a callback indicating an error.
+     */
     fun changePassword(newPassword: String, callback: ChangePasswordResultCallback) {
 
         val url = "http://10.0.2.2:8080/methodPostChangePasswd"
@@ -99,7 +127,7 @@ class LoginDataSource(context: Context) {
         val stringRequest = object : StringRequest(
             Method.POST, url,
             Response.Listener<String> { response ->
-                Log.d(TAG, response)
+                //Log.d(TAG, response)
                 if (response == "OK") {
                     Result.Success(response)
                     callback.onResult(Result.Success(response))
@@ -123,4 +151,19 @@ class LoginDataSource(context: Context) {
 
         queue.add(stringRequest)
     }
+
+}
+
+/**
+ * Interface that will be used for callbacks when the login request is completed
+ */
+interface LoginResultCallback {
+    fun onResult(result: LoginResult)
+}
+
+/**
+ * Interface that will be used for callbacks when the change password request is completed
+ */
+interface ChangePasswordResultCallback {
+    fun onResult(result: Result<String>)
 }

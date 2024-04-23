@@ -71,15 +71,22 @@ class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
                 supportActionBar?.setDisplayHomeAsUpEnabled(false)
                 binding.addButton.visibility = View.VISIBLE
                 binding.profileButton.visibility = View.VISIBLE
+                binding.cancelButton.visibility = View.GONE
             } else if (destination.id == R.id.LoginFragment) {
                 supportActionBar?.setDisplayHomeAsUpEnabled(false)
                 binding.addButton.visibility = View.GONE
                 binding.profileButton.visibility = View.GONE
+                binding.cancelButton.visibility = View.GONE
+            } else if (destination.id == R.id.editPhotoFragment || destination.id == R.id.PreviewFragment) {
+                supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                binding.cancelButton.visibility = View.VISIBLE
+                supportActionBar?.setDisplayShowTitleEnabled(false)
             }
             else {
                 supportActionBar?.setDisplayHomeAsUpEnabled(true)
                 binding.addButton.visibility = View.GONE
                 binding.profileButton.visibility = View.GONE
+                binding.cancelButton.visibility = View.GONE
             }
         }
 
@@ -95,6 +102,10 @@ class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
 
         binding.addButton.setOnClickListener {
             pickImageLauncher.launch("image/*")
+        }
+
+        binding.cancelButton.setOnClickListener{
+            navController.popBackStack()
         }
     }
 

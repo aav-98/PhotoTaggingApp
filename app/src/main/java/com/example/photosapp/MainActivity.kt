@@ -79,6 +79,8 @@ class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
                 binding.cancelButton.visibility = View.GONE
             } else if (destination.id == R.id.editPhotoFragment || destination.id == R.id.PreviewFragment) {
                 supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                binding.addButton.visibility = View.GONE
+                binding.profileButton.visibility = View.GONE
                 binding.cancelButton.visibility = View.VISIBLE
                 supportActionBar?.setDisplayShowTitleEnabled(false)
             }

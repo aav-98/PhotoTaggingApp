@@ -4,81 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".EditPhotoFragment">
+    tools:context=".EditPhotoFragment"
+    android:id="@+id/editPhotoLayout">
 
-
-    <Button
-        android:id="@+id/saveButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="Save"
-        android:layout_alignParentEnd="true">
-    </Button>
-
-    <Button
-        android:id="@+id/cropButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Crop"
-        android:layout_alignParentEnd="true"
-        android:visibility="gone" >
-    </Button>
-
-    <Button
-        android:id="@+id/doneButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Done"
-        android:layout_alignParentEnd="true"
-        android:visibility="gone" >
-    </Button>
-
-    <Button
-        android:id="@+id/brightnessDoneButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Done"
-        android:layout_alignParentEnd="true"
-        android:visibility="gone" >
-    </Button>
-
-    <Button
-        android:id="@+id/contrastDoneButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Done"
-        android:layout_alignParentEnd="true"
-        android:visibility="gone" >
-    </Button>
-
-    <Button
-        android:id="@+id/saturationDoneButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Done"
-        android:layout_alignParentEnd="true"
-        android:visibility="gone" >
-    </Button>
-
-    <ImageButton
-        android:id="@+id/rotateButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/outline_rotate_right_black_24"
-        android:background="?attr/selectableItemBackground"
-        android:padding="8dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:visibility="gone">
-    </ImageButton>
 
     <ImageView
         android:id="@+id/image"
         android:layout_width="match_parent"
-        android:layout_height="500dp"
+        android:layout_height="match_parent"
         android:layout_above="@id/toolsRecyclerView"
-        android:layout_below="@id/saveButton"
         android:scaleType="fitCenter" >
     </ImageView>
 
@@ -86,7 +20,7 @@
         android:id="@+id/cropImageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/saveButton"
+        android:layout_above="@id/buttonLayout"
         android:scaleType="fitCenter"
         android:visibility="gone" />
 
@@ -94,7 +28,7 @@
         android:id="@+id/gpuImageLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/saveButton"
+        android:layout_above="@id/buttonLayout"
         app:gpuimage_surface_type="surface_view"
         android:visibility="gone">
         
@@ -123,15 +57,71 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-
     <androidx.recyclerview.widget.RecyclerView
+        android:layout_centerInParent="true"
         android:id="@+id/toolsRecyclerView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@id/buttonLayout"
         android:orientation="horizontal"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager">
     </androidx.recyclerview.widget.RecyclerView>
+
+
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonLayout"
+        android:layout_alignParentBottom="true"
+        android:paddingTop="10dp">
+
+        <ImageButton
+            android:id="@+id/rotateButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/outline_rotate_right_black_24"
+            android:background="?attr/selectableItemBackground"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/saveButton"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginVertical="16dp"
+            android:text="Save changes"
+            android:layout_centerHorizontal="true"
+            android:enabled="false">
+        </Button>
+
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:layout_alignParentStart="true"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginVertical="16dp"
+            android:visibility="gone">
+        </Button>
+
+        <Button
+            android:id="@+id/doneButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/done_button_text"
+            android:layout_alignParentEnd="true"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginVertical="16dp"
+            android:visibility="gone" >
+        </Button>
+
+
+    </RelativeLayout>
 
 
 

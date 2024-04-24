@@ -56,5 +56,7 @@
     <string name="new_password">New Password</string>
     <string name="tool_name">tool name</string>
     <string name="submit_changes_button_text">Submit changes</string>
+    <string name="done_button_text">Done</string>
+    <string name="crop_button_text">Crop</string>
 
 </resources>

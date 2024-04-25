@@ -40,10 +40,11 @@ class PostDetailFragment : BaseMapFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val position = args.position
+        val fn = args.fn
         val tags = photoViewModel.tagsLiveData.value
-        if (tags != null) {
+        val position = tags?.tagPhoto?.indexOf(fn)
+
+        if (position != null) {
             val description = tags.tagDes[position]
             val peopleNames = tags.tagPeopleName[position]
             val location = tags.tagLocation[position]

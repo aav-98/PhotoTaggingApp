@@ -62,7 +62,7 @@ class PreviewFragment : BaseMapFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         if (args.mode == "new") {
-            Log.d(TAG, "er jeg new")
+            Log.d(TAG, "new photo")
             Uri.parse(args.photoURI)?.let { uri ->
                 imageBitMap = uriToBitmap(uri)
                 binding.imageView.setImageBitmap(imageBitMap)
@@ -73,7 +73,7 @@ class PreviewFragment : BaseMapFragment() {
         else {
             if (args.mode != "newEdit") binding.submitButton.text = getString(R.string.submit_changes_button_text)
             if (args.mode == "editEdit") photoChange = true
-            Log.d(TAG, "er jeg gammel")
+            Log.d(TAG, "old photo or edited photo")
             photoViewModel.currentPhotoDetails.value?.let {photoDetails ->
                 binding.peopleEditText.setText(photoDetails.people)
                 position = photoDetails.id
@@ -89,9 +89,7 @@ class PreviewFragment : BaseMapFragment() {
                         Log.e(TAG, "Invalid location format", e)
                     }
                 }
-                Log.d(TAG, "KOM DU HIT nr1")
                 photoViewModel.editedPhoto.value?.let { bitmap ->
-                    Log.d(TAG, "KOM DU HIT nr2")
                     binding.imageView.setImageBitmap(bitmap)
                     imageBitMap = bitmap
                 }
@@ -116,7 +114,7 @@ class PreviewFragment : BaseMapFragment() {
             val location = binding.locationView.text.toString()
             val people = binding.peopleEditText.text.toString()
 
-            photoViewModel.setCurrentPhotoDetails(PhotoDetails(position.toString(), description, location, people))
+            photoViewModel.setCurrentPhotoDetails(PhotoDetails(position, description, location, people))
 
             photoViewModel.setEditedPhoto(imageBitMap as Bitmap)
             val action = PreviewFragmentDirections.actionPreviewFragmentToEditPhotoFragment(args.mode)

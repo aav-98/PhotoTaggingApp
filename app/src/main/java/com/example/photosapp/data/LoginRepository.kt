@@ -27,17 +27,25 @@ class LoginRepository(val dataSource: LoginDataSource, appContext: Context) {
     private val sharedPref: SharedPreferences =
         context.getSharedPreferences("com.example.photosapp.USER_DETAILS", Context.MODE_PRIVATE)
 
-    init {
-        // If user credentials will be cached in local storage, it is recommended it be encrypted
-        // @see https://developer.android.com/training/articles/keystore
-    }
-
     var loginResult = MutableLiveData<LoginResult>()
     var user = MutableLiveData<LoggedInUser>()
 
     private val _changePasswordResult = MutableLiveData<Result<String>>()
     val changePasswordResult: LiveData<Result<String>> = _changePasswordResult
 
+    /**
+     * Initiates a login request with the specified username and password.
+     * This function interacts with the dataSource to perform the login operation.
+     * The result of the login operation is handled by a callback that updates the LiveData
+     * loginResult based on the success or failure of the login attempt.
+     *
+     * @param username The username entered by the user.
+     * @param password The password entered by the user.
+     *
+     * If the login is successful, the user's details are saved to SharedPreferences
+     * and the success result is posted to the loginResult LiveData.
+     * If the login fails, the error is posted to the loginResult LiveData.
+     */
     fun login(username: String, password: String) {
         dataSource.login(username, password, object: LoginResultCallback {
             override fun onResult(result: LoginResult) {
@@ -51,6 +59,14 @@ class LoginRepository(val dataSource: LoginDataSource, appContext: Context) {
         })
     }
 
+    /**
+     * Saves the details of a logged-in user to SharedPreferences.
+     *
+     * @param loggedInUser The LoggedInUser instance containing the user's details.
+     *
+     * Upon execution, the method also updates a LiveData user with the loggedInUser object,
+     * enabling the app's UI to react to changes in user details immediately.
+     */
     private fun saveUserDetailsToSharedPreferences(loggedInUser: LoggedInUser) {
         user.postValue(loggedInUser)
         with (sharedPref.edit()) {
@@ -66,6 +82,7 @@ class LoginRepository(val dataSource: LoginDataSource, appContext: Context) {
         }
     }
 
+
     fun logout() {
         dataSource.logout()
         loginResult.postValue(LoginResult(loggedOut = R.string.log_out))
@@ -74,12 +91,7 @@ class LoginRepository(val dataSource: LoginDataSource, appContext: Context) {
 
         dataSource.changePassword(newPassword, object: ChangePasswordResultCallback {
             override fun onResult(result: Result<String>) {
-                if (result is Result.Success) {
-                    Log.d(TAG, "Changed password")
-                    _changePasswordResult.value = result
-                } else {
-                    _changePasswordResult.value = result
-                }
+                _changePasswordResult.value = result
             }
         })
     }

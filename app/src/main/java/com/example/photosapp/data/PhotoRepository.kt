@@ -217,6 +217,7 @@ class PhotoRepository(context: Context) {
         }
         val indexUpdateTag = (findEmptySpaceId().takeIf { it != -1 } ?: numberOfTags)
         val fileName = userId + indexUpdateTag
+        Log.d("PLSFILENAME", "Filename: $fileName")
 
 
         uploadPhoto(userId, indexUpdateTag.toString(), fileName, imageBase64,
@@ -274,7 +275,7 @@ class PhotoRepository(context: Context) {
                         addPhoto(fileName, updateTagPho)
                         updateTags(indexUpdateTag, updateTagDes, fileName, updateTagLoc, updateTagPeopleName,
                         onSuccess = {offline ->
-                            addTag(indexUpdateTag.toInt(), updateTagDes, updateTagPho, updateTagLoc, updateTagPeopleName)
+                            addTag(indexUpdateTag.toInt(), updateTagDes, fileName, updateTagLoc, updateTagPeopleName)
                             if (offline) addUnsynchedPost(indexUpdateTag.toInt(), SyncOperation.UPDATE)
                         },
                         onError = {
@@ -533,6 +534,8 @@ class PhotoRepository(context: Context) {
             val fn = tags.tagPhoto[item.id]
             val loc = tags.tagLocation[item.id]
             val people = tags.tagPeopleName[item.id]
+
+            Log.d("PLSFILENAME", "Filename in retry unsynched post + $fn")
 
             publishUnsyncedPost(item.id.toString(), fn, des, loc, people, item.operation,
                 onComplete = {retryUnsynchedPost(posts, index + 1)},

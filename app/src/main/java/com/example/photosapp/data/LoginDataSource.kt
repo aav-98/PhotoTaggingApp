@@ -19,11 +19,11 @@ import com.example.photosapp.ui.login.LoginResult
  */
 class LoginDataSource(context: Context) {
 
+    private val TAG = javaClass.simpleName
+
     private val appContext = context.applicationContext
 
     private val sharedPreferences = appContext.getSharedPreferences("com.example.photosapp.USER_DETAILS", Context.MODE_PRIVATE)
-
-    private val TAG = javaClass.simpleName
 
     private val queue = Volley.newRequestQueue(appContext)
 

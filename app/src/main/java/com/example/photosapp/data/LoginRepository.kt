@@ -3,6 +3,7 @@ package com.example.photosapp.data
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.photoapp.data.LoginDataSource
 import com.example.photoapp.data.LoginResultCallback
@@ -34,7 +35,8 @@ class LoginRepository(val dataSource: LoginDataSource, appContext: Context) {
     var loginResult = MutableLiveData<LoginResult>()
     var user = MutableLiveData<LoggedInUser>()
 
-    var changePasswordResult = MutableLiveData<Result<String>>()
+    private val _changePasswordResult = MutableLiveData<Result<String>>()
+    val changePasswordResult: LiveData<Result<String>> = _changePasswordResult
 
     fun login(username: String, password: String) {
         dataSource.login(username, password, object: LoginResultCallback {
@@ -74,9 +76,9 @@ class LoginRepository(val dataSource: LoginDataSource, appContext: Context) {
             override fun onResult(result: Result<String>) {
                 if (result is Result.Success) {
                     Log.d(TAG, "Changed password")
-                    changePasswordResult.value = result
+                    _changePasswordResult.value = result
                 } else {
-                    changePasswordResult.value = result
+                    _changePasswordResult.value = result
                 }
             }
         })
@@ -94,5 +96,9 @@ class LoginRepository(val dataSource: LoginDataSource, appContext: Context) {
             livingCity = sharedPref.getString(context.getString(R.string.living_city_key), "livingCity"),
             yearOfBirth = sharedPref.getString(context.getString(R.string.year_of_birth_key), "yearOfBirth")
         ))
+    }
+
+    fun resetChangePasswordResult() {
+        _changePasswordResult.value = Result.Empty()
     }
 }

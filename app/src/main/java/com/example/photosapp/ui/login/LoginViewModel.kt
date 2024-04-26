@@ -76,6 +76,11 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
         }
     }
 
+    fun resetChangePasswordResult() {
+        _newPasswordForm.value = newPasswordFormState()
+        loginRepository.resetChangePasswordResult()
+    }
+
     fun loadUser() {
         loginRepository.getUser()
     }

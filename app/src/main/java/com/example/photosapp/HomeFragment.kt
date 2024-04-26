@@ -12,22 +12,22 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import com.example.photosapp.data.model.PhotoDetails
 import com.example.photosapp.databinding.FragmentHomeBinding
 
 /**
- * A simple [Fragment] subclass as the default destination in the navigation.
+ * A fragment responsible for displaying a grid of photos.
+ *
+ * This fragment sets up a RecyclerView to display photos fetched from the ViewModel.
+ * It observes changes in tags and photos data and updates the UI accordingly.
  */
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-
+    private val TAG = javaClass.simpleName
     private val photoViewModel: PhotoViewModel by activityViewModels {
         PhotoViewModelFactory(requireActivity().applicationContext)
     }
-
-    private val TAG = javaClass.simpleName
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,13 +35,12 @@ class HomeFragment : Fragment() {
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //Setting up the recycle view for the pictures
+        //Setting up the recycleView and the OnPhotoClickListener
         val photosList = mutableListOf<Pair<String,Bitmap>>()
         val adapter = PhotosAdapter(photosList, object : OnPhotoClickListener {
             override fun onPhotoClick(position : Int) {
@@ -56,13 +55,13 @@ class HomeFragment : Fragment() {
         })
         binding.photosRecyclerView.adapter = adapter
         binding.photosRecyclerView.layoutManager = GridLayoutManager(context, 2)
+
+        //Updating the recycleView with the tags and photos observed from tagsLiveData and photoLiveData
         photoViewModel.tagsLiveData.observe(viewLifecycleOwner) { tags ->
-            Log.d(TAG, "Tags observed changed")
-            if (tags != null) {
+            tags?.let {
                 photoViewModel.loadPhotos()
 
                 photoViewModel.photoLiveData.observe(viewLifecycleOwner) { photosMap ->
-                    Log.d(TAG, "Photos observed changed")
                     photosList.clear()
                     tags.tagPhoto.toList().take(tags.numberOfTags.toInt()).forEach { fn ->
                         photosMap[fn]?.let { base64String ->
@@ -83,6 +82,13 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
+    interface MainActivityCallback {
+        fun onPhotoCountChanged(count: Int)
+    }
+
+    /**
+     * Converts a Base64 encoded string to a Bitmap object
+     */
     private fun String.toBitmap(): Bitmap? {
         return try {
             val bytes = Base64.decode(this, Base64.DEFAULT)
@@ -91,9 +97,4 @@ class HomeFragment : Fragment() {
             null
         }
     }
-
-    interface MainActivityCallback {
-        fun onPhotoCountChanged(count: Int)
-    }
-
 }

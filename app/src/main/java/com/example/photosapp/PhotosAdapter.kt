@@ -7,8 +7,17 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 
-class PhotosAdapter(private val photos: List<Pair<String,Bitmap>>, private val clickListener: OnPhotoClickListener): RecyclerView.Adapter<PhotosAdapter.PhotoViewHolder>() {
-
+/**
+ * Adapter for displaying the list of photos in a RecyclerView, used by [HomeFragment]
+ *
+ * This adapter binds a list of photos represented as pairs of [String] and [Bitmap] to ImageView items
+ * in the RecyclerView. It also provides a click listener interface to handle clicks on individual photo items.
+ *
+ * @property photos The list of photo data represented as pairs of filenames and corresponding bitmaps.
+ * @property clickListener The click listener interface to handle clicks on individual photo items.
+ */
+class PhotosAdapter(private val photos: List<Pair<String,Bitmap>>, private val clickListener: OnPhotoClickListener):
+    RecyclerView.Adapter<PhotosAdapter.PhotoViewHolder>() {
     class PhotoViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val imageView: ImageView = view.findViewById(R.id.photoImageView)
     }
@@ -27,5 +36,9 @@ class PhotosAdapter(private val photos: List<Pair<String,Bitmap>>, private val c
     }
 
     override fun getItemCount() = photos.size
+}
+
+interface OnPhotoClickListener {
+    fun onPhotoClick(position: Int)
 }
 

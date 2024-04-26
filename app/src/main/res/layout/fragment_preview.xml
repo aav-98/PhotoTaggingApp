@@ -35,7 +35,7 @@ tools:context=".PreviewFragment">
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Replace photo"
+                android:text="@string/replace_photo_button_text"
                 android:backgroundTint="#8D504072"
                 app:layout_constraintTop_toBottomOf="@id/imageView"
                 app:layout_constraintStart_toStartOf="parent"
@@ -62,7 +62,7 @@ tools:context=".PreviewFragment">
                 app:layout_constraintTop_toBottomOf="@+id/editPhotoButton"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="16dp"
-                android:text="Description"
+                android:text="@string/description_label_text"
                 android:textStyle="bold"
                 android:labelFor="@id/imageDescriptionEditText">
 
@@ -72,13 +72,14 @@ tools:context=".PreviewFragment">
                 android:id="@+id/imageDescriptionEditText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="@string/caption_field_text"
                 android:layout_marginHorizontal="16dp"
                 app:layout_constraintTop_toBottomOf="@id/descriptionViewLabel"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:textSize="16sp"
-                android:gravity="top" />
+                android:gravity="top"
+                android:inputType="text"
+                android:importantForAutofill="no" />
 
             <TextView
                 android:id="@+id/peopleViewLabel"
@@ -87,7 +88,7 @@ tools:context=".PreviewFragment">
                 app:layout_constraintTop_toBottomOf="@id/imageDescriptionEditText"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="16dp"
-                android:text="People in the photo"
+                android:text="@string/people_lable_text"
                 android:textStyle="bold"
                 android:labelFor="@id/peopleEditText">
 
@@ -97,13 +98,13 @@ tools:context=".PreviewFragment">
                 android:id="@+id/peopleEditText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="@string/tag_field_text"
                 android:layout_marginHorizontal="16dp"
                 app:layout_constraintTop_toBottomOf="@id/peopleViewLabel"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:textSize="16sp"
-                android:gravity="top" />
+                android:gravity="top"
+                android:importantForAutofill="no" />
 
 
 
@@ -114,7 +115,7 @@ tools:context=".PreviewFragment">
                 app:layout_constraintTop_toBottomOf="@id/peopleEditText"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="16dp"
-                android:text="Location"
+                android:text="@string/location_lable_text"
                 android:labelFor="@id/locationView"
                 android:textStyle="bold">
 

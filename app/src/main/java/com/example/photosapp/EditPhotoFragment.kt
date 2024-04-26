@@ -28,6 +28,7 @@ import jp.co.cyberagent.android.gpuimage.filter.GPUImageSaturationFilter
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilter
 import jp.co.cyberagent.android.gpuimage.util.Rotation
 import kotlin.math.roundToInt
+import com.example.photosapp.data.model.Modes
 
 /**
  * Fragment for editing photos with functionalities including brightness, contrast, saturation adjustments,
@@ -92,8 +93,8 @@ class EditPhotoFragment : Fragment(), CropImageView.OnCropImageCompleteListener 
 
         binding.saveButton.setOnClickListener {
             imageBitMap?.let {photoViewModel.setEditedPhoto(imageBitMap as Bitmap)}
-            if (args.mode == "new") findNavController().navigate(EditPhotoFragmentDirections.actionEditPhotoFragmentToPreviewFragment("newEdit"))
-            else findNavController().navigate(EditPhotoFragmentDirections.actionEditPhotoFragmentToPreviewFragment("editEdit"))
+            if (args.mode == Modes.NEW) findNavController().navigate(EditPhotoFragmentDirections.actionEditPhotoFragmentToPreviewFragment(Modes.NEW_WITH_EDITED_PHOTO))
+            else findNavController().navigate(EditPhotoFragmentDirections.actionEditPhotoFragmentToPreviewFragment(Modes.EDIT_WITH_EDITED_PHOTO))
         }
     }
 

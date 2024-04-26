@@ -16,6 +16,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import com.example.photosapp.databinding.ActivityMainBinding
 import com.example.photosapp.ui.login.LoginViewModel
 import com.example.photosapp.ui.login.LoginViewModelFactory
+import com.example.photosapp.data.model.Modes
 
 /**
  * The main activity of the app responsible for handling navigation and user authentication.
@@ -53,7 +54,6 @@ class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
         if (isLoggedIn()) {
             photoViewModel.loadTags()
             loginViewModel.loadUser()
-            //TODO: There is probably a better way to do this?
             photoViewModel.tagsLiveData.observe(this) {
                 photoViewModel.loadPhotos()
             }
@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
 
     private fun navigateToPreviewFragment(imageUri: Uri) {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
-        val action = HomeFragmentDirections.actionHomeFragmentToPreviewFragment("new", photoURI = imageUri.toString())
+        val action = HomeFragmentDirections.actionHomeFragmentToPreviewFragment(Modes.NEW, photoURI = imageUri.toString())
         navController.navigate(action)
     }
 

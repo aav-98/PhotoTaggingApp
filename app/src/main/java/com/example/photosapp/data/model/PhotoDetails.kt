@@ -1,7 +1,7 @@
 package com.example.photosapp.data.model
 
 /**
- * Data class that captures information about photo taken
+ * Data class that holds the information/tags about a photo
  */
 data class PhotoDetails(
     val id: String,

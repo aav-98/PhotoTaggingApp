@@ -21,8 +21,21 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
-
+/**
+ * Repository class responsible for managing data operations related to photos,
+ * including fetching/storing tags and photos, uploading and updating posts, and handling
+ * offline synchronization.
+ */
 class PhotoRepository(context: Context) {
+    private val appContext = context.applicationContext
+    private val TAG = javaClass.simpleName
+    private val sharedPref: SharedPreferences =
+        appContext.getSharedPreferences("com.example.photosapp.USER_DETAILS", Context.MODE_PRIVATE)
+
+    val tagsLiveData = MutableLiveData<Tags?>()
+    val photoLiveData = MutableLiveData<Map<String, String>>()
+    private val tempPhotoUpdates = mutableMapOf<String, String>()
+
     private var periodicTaskScheduled = false
     private var executorService : ScheduledExecutorService? = null
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -34,103 +47,14 @@ class PhotoRepository(context: Context) {
         registerNetworkCallback()
     }
 
-    private fun registerNetworkCallback() {
-        connectivityManager.registerNetworkCallback(networkRequest, object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                super.onAvailable(network)
-                Log.d("OFFLINE_MODE", "NETWORK IS AVAILABLE")
-                Log.d(TAG, "Network is available")
-                if (loadUnsyncedPost().isNotEmpty()) {
-                    isServerReachable { reachable ->
-                        if (reachable) {
-                            retryUnsynchedPosts()
-                        } else {
-                            Log.d("OFFLINE_MODE", "BUT THE SERVER IS NOT")
-                            if (!periodicTaskScheduled) startPeriodicServerCheck()
-                        }
-                    }
-                }
-            }
 
-            override fun onLost(network: Network) {
-                super.onLost(network)
-                Log.d("OFFLINE_MODE", "NETWORK IS LOST, starting periodic server check...")
-                Log.d(TAG, "Network is lost")
-                if (periodicTaskScheduled) stopPeriodicServerCheck()
-            }
-        })
-    }
-
-    private fun isServerReachable(onComplete: (Boolean) -> Unit) {
-        val queue = Volley.newRequestQueue(appContext)
-        val url = "http://10.0.2.2:8080/getMethodTesting"
-
-        val stringRequest = object : StringRequest(
-            Method.GET, url,
-            Response.Listener<String> { response ->
-                onComplete(true)
-                Log.d(TAG, "The server is online")
-            },
-            Response.ErrorListener { error ->
-                if (error.cause is java.net.ConnectException) {
-                    onComplete(false)
-                    Log.d(TAG, "The server is offline")
-                }
-            }) {}
-        queue.add(stringRequest)
-    }
-
-    private fun startPeriodicServerCheck() {
-        Log.d("OFFLINE_MODE", "Started the periodic server check")
-        periodicTaskScheduled = true
-        executorService = Executors.newSingleThreadScheduledExecutor()
-        val periodicTask = Runnable {
-            Log.d("OFFLINE_MODE", "EXECUTING A SERVER CHECK")
-            if (isNetworkAvailable()) {
-                isServerReachable { reachable ->
-                    if (reachable) {
-                        retryUnsynchedPosts()
-                    }
-                }
-            }
-        }
-        executorService?.scheduleAtFixedRate(periodicTask, 0, 10, TimeUnit.SECONDS)
-    }
-
-    private fun isNetworkAvailable(): Boolean {
-        val network = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(network)
-        return capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-    }
-
-    fun stopPeriodicServerCheck() {
-        Log.d("OFFLINE_MODE", "Stopping the periodic server check")
-        executorService?.shutdownNow()
-        executorService = null
-        periodicTaskScheduled = false
-    }
-
-
-
-
-    private val appContext = context.applicationContext
-    private val TAG = javaClass.simpleName
-
-    private val sharedPref: SharedPreferences =
-        appContext.getSharedPreferences("com.example.photosapp.USER_DETAILS", Context.MODE_PRIVATE)
-
-    val tagsLiveData = MutableLiveData<Tags?>()
-    val photoLiveData = MutableLiveData<Map<String, String>>()
-    private val tempPhotoUpdates = mutableMapOf<String, String>()
-
+    //MAIN METHODS ACCESSED BY VIEWMODEL
 
     /**
-     * If network is available, method tries to fetch the tags from the server, if it is successful this is posted to tagsLiveData,
-     * if it fails the tags are fetched from shared preferences.
-     * If the network is unavailable the method directly fetches the tags from shared pref.
+     * Retrieves tags associated with the user's account from the server or local storage,
+     * and updates the [tagsLiveData] accordingly.
      */
     fun getTags() {
-        //I need to get the tags from shared preferences if there are any
         val savedTags = loadTagsFromSharedPref()
         if (savedTags != null) {
             tagsLiveData.postValue(savedTags)
@@ -139,20 +63,16 @@ class PhotoRepository(context: Context) {
 
             if (userId != null) {
                 val queue = Volley.newRequestQueue(appContext)
-
                 val uri = java.lang.String.format("http://10.0.2.2:8080/getMethodMyTags?id=%1\$s", userId)
 
                 val stringRequest = object : StringRequest(
                     Method.GET, uri,
                     Response.Listener<String> { response ->
                         val gson = Gson()
-                        Log.d(TAG, "Response: $response")
                         if (response != null) {
                             val tags: Tags = gson.fromJson(response, Tags::class.java)
-                            Log.d(TAG, "Tags fetched: $tags")
                             tagsLiveData.postValue(tags)
                             saveTagsInSharedPref(tags)
-                            Log.d("MY_TAGS_BRO", "GOT THE TAGS FROM THE SERVER")
                         } else {
                             Toast.makeText(appContext, "Could not load posts", Toast.LENGTH_SHORT).show()
                         }
@@ -168,15 +88,14 @@ class PhotoRepository(context: Context) {
     }
 
     /**
-     * Populates photoLiveData by going through all the photo filenames from tagsLiveData and fetching the corresponding pictures.
-     * It initially tries to fetch the photo from shared preferences, but if its unavailable the photo is downloaded from the server.
-     * @see downloadPhoto
+     * Retrieves photos associated with the user's account based on the available tags,
+     * from the server or local storage,
+     * and updates the [photoLiveData] accordingly.
      */
     fun getPhotos() {
         val numberOfTags = tagsLiveData.value?.numberOfTags?.toIntOrNull()
         if (numberOfTags != null) {
             val photoFilenames = tagsLiveData.value?.tagPhoto?.take(numberOfTags)?: listOf()
-            Log.d(TAG, "getPhotos(): Filenames to find $photoFilenames")
 
             var downloadsInit = 0
             var downloadsComp = 0
@@ -186,7 +105,6 @@ class PhotoRepository(context: Context) {
                     val savedPhoto = loadPhotoFromSharedPref(fn)
                     if (savedPhoto != null) {
                         tempPhotoUpdates[fn] = savedPhoto
-                        Log.d(TAG, "getPhotos(): Loaded image $fn from shared preferences")
                     } else if (isNetworkAvailable()) {
                         downloadsInit++
                         downloadPhoto(fn) {
@@ -195,7 +113,6 @@ class PhotoRepository(context: Context) {
                                 updatePhotoLiveData()
                             }
                         }
-                        Log.d(TAG, "getPhotos(): Loaded image $fn from server")
                     }
                 }
             }
@@ -205,9 +122,15 @@ class PhotoRepository(context: Context) {
         }
     }
 
-    //TODO: I need to make this work offline...
+    /**
+     * Publishes a new post to the server, by uploading the photo and the corresponding tags to the server
+     *
+     * @param imageBase64 The Base64-encoded string representation of the image.
+     * @param newTagDes The description of the new tag.
+     * @param newTagLoc The location associated with the new tag.
+     * @param newTagPeopleName The names of people associated with the new tag.
+     */
     fun publishPost(imageBase64: String, newTagDes: String, newTagLoc: String, newTagPeopleName: String) {
-        //retryUnsynchedPosts()
         val userId = sharedPref.getString(appContext.getString(R.string.user_id_key), null)
         val numberOfTags = tagsLiveData.value?.numberOfTags?.toIntOrNull()
 
@@ -217,12 +140,10 @@ class PhotoRepository(context: Context) {
         }
         val indexUpdateTag = (findEmptySpaceId().takeIf { it != -1 } ?: numberOfTags)
         val fileName = userId + indexUpdateTag
-        Log.d("PLSFILENAME", "Filename: $fileName")
-
 
         uploadPhoto(userId, indexUpdateTag.toString(), fileName, imageBase64,
             onSuccess = {
-                addPhoto(fileName, imageBase64) //TODO: SHould i just do this after insertNew tags is a sucess, and not needing to remove it..
+                addPhoto(fileName, imageBase64)
                 if (indexUpdateTag == numberOfTags) { // Implies a new tag insertion
                     insertNewTags(userId, indexUpdateTag.toString(), newTagDes, fileName, newTagLoc, newTagPeopleName,
                         onSuccess = { offline ->
@@ -249,8 +170,16 @@ class PhotoRepository(context: Context) {
         )
     }
 
+    /**
+     * Updates an existing post, by uploading the photo and the corresponding tags to the server
+     *
+     * @param indexUpdateTag The index of the tag to be updated.
+     * @param updateTagDes The updated description of the tag.
+     * @param updateTagPho The updated photo associated with the tag.
+     * @param updateTagLoc The updated location associated with the tag.
+     * @param updateTagPeopleName The updated names of people associated with the tag.
+     */
     fun updatePost(indexUpdateTag: String, updateTagDes: String, updateTagPho: String, updateTagLoc: String, updateTagPeopleName: String) {
-        //retryUnsynchedPosts()
         val userId = sharedPref.getString(appContext.getString(R.string.user_id_key), null)
         if (userId.isNullOrEmpty() || indexUpdateTag.isEmpty()) {
             Log.d(TAG, "User ID or tag index is missing.")
@@ -286,49 +215,44 @@ class PhotoRepository(context: Context) {
             }
         }
     }
-    private fun updateTags(indexUpdateTag: String, updateTagDes: String, updateTagPho: String, updateTagLoc: String, updateTagPeopleName: String, onSuccess: (offline : Boolean) -> Unit, onError: () -> Unit) {
-        val userId = sharedPref.getString(appContext.getString(R.string.user_id_key), null)
-        if (userId != null ) {
-            val queue = Volley.newRequestQueue(appContext)
 
-            val url = "http://10.0.2.2:8080/postUpdateTag"
 
-            val stringRequest = object : StringRequest(
-                Method.POST, url,
-                Response.Listener<String> { response ->
-                    if (response.toString() == "OK") {
-                        Log.d(TAG, "Successful updating of tags")
-                        onSuccess(false)
-                    } else {
-                        Log.d(TAG, "Unsuccessful updating of tags, removing the photo")
-                        onError()
-                    }
-                },
-                Response.ErrorListener { error ->
-                    if (error.cause is java.net.ConnectException) {
-                        Log.d(TAG, "Error $error: adding the photo to liveData only")
-                        onSuccess(true)
-                    } else {
-                        Log.d(TAG, "Error $error: removing the photo")
-                        onError()
-                    }
-                }) {
+    //METHODS TO DO NETWORK CALLS TO THE SERVER
 
-                override fun getParams(): Map<String, String> {
-                    val params = HashMap<String, String>()
-                    params["userId"] = userId
-                    params["indexUpdateTag"] = indexUpdateTag
-                    params["updateTagDes"] = updateTagDes
-                    params["updateTagPho"] = updateTagPho
-                    params["updateTagLoc"] = updateTagLoc
-                    params["updateTagPeopleName"] = updateTagPeopleName
-                    return params
-                }
+    /**
+     * Uploads a photo to the server
+     */
+    private fun uploadPhoto(userId: String, tagId: String, fileName: String, imageBase64: String, onSuccess: () -> Unit, onError: () -> Unit) {
+        val queue = Volley.newRequestQueue(appContext)
+
+        val url = "http://10.0.2.2:8080/postMethodUploadPhoto"
+
+        val stringRequest = object : StringRequest(
+            Method.POST, url,
+            Response.Listener<String> { response ->
+                if (response.toString() == "OK") onSuccess()
+                else onError()
+            },
+            Response.ErrorListener { error ->
+                if (error.cause is java.net.ConnectException) onSuccess()
+                else onError()
+            }) {
+
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["userId"] = userId
+                params["tagId"] = tagId
+                params["fileName"] = fileName
+                params["imageStringBase64"] = imageBase64
+                return params
             }
-            queue.add(stringRequest)
         }
+        queue.add(stringRequest)
     }
 
+    /**
+     * Uploads new tags to the server
+     */
     private fun insertNewTags(userId: String, indexUpdateTag: String, newTagDes: String, newTagPho: String, newTagLoc: String, newTagPeopleName: String, onSuccess: (offline : Boolean) -> Unit, onError: () -> Unit) {
         val queue = Volley.newRequestQueue(appContext)
 
@@ -338,20 +262,15 @@ class PhotoRepository(context: Context) {
             Method.POST, url,
             Response.Listener<String> { response ->
                 if (response.toString() == "OK") {
-                    Log.d(TAG, "Successful inserting of new tags")
                     onSuccess(false)
                 } else {
-                    Log.d(TAG, "Unsuccessful inserting of new tags, removing the photo")
                     onError()
                 }
             },
             Response.ErrorListener { error ->
-                Log.e(TAG, "Insert tags failed: ${error.message}")
                 if (error.cause is java.net.ConnectException) {
-                    Log.d(TAG, "Error $error: adding the photo to liveData only")
                     onSuccess(true)
                 } else {
-                    Log.d(TAG, "Error $error: removing the photo")
                     onError()
                 }
             }) {
@@ -372,36 +291,51 @@ class PhotoRepository(context: Context) {
 
     }
 
-    private fun uploadPhoto(userId: String, tagId: String, fileName: String, imageBase64: String, onSuccess: () -> Unit, onError: () -> Unit) {
-        val queue = Volley.newRequestQueue(appContext)
+    /**
+     * Updates existing tags in the server
+     */
+    private fun updateTags(indexUpdateTag: String, updateTagDes: String, updateTagPho: String, updateTagLoc: String, updateTagPeopleName: String, onSuccess: (offline : Boolean) -> Unit, onError: () -> Unit) {
+        val userId = sharedPref.getString(appContext.getString(R.string.user_id_key), null)
+        if (userId != null ) {
+            val queue = Volley.newRequestQueue(appContext)
 
-        val url = "http://10.0.2.2:8080/postMethodUploadPhoto"
+            val url = "http://10.0.2.2:8080/postUpdateTag"
 
-        val stringRequest = object : StringRequest(
-            Method.POST, url,
-            Response.Listener<String> { response ->
-                Log.d(TAG, "Upload photo response: $response")
-                if (response.toString() == "OK") onSuccess()
-                else onError()
-            },
-            Response.ErrorListener { error ->
-                Log.e(TAG, "Upload photo failed: ${error.message}")
-                if (error.cause is java.net.ConnectException) onSuccess()
-                else onError()
-            }) {
+            val stringRequest = object : StringRequest(
+                Method.POST, url,
+                Response.Listener<String> { response ->
+                    if (response.toString() == "OK") {
+                        onSuccess(false)
+                    } else {
+                        onError()
+                    }
+                },
+                Response.ErrorListener { error ->
+                    if (error.cause is java.net.ConnectException) {
+                        onSuccess(true)
+                    } else {
+                        onError()
+                    }
+                }) {
 
-            override fun getParams(): Map<String, String> {
-                val params = HashMap<String, String>()
-                params["userId"] = userId
-                params["tagId"] = tagId
-                params["fileName"] = fileName
-                params["imageStringBase64"] = imageBase64
-                return params
+                override fun getParams(): Map<String, String> {
+                    val params = HashMap<String, String>()
+                    params["userId"] = userId
+                    params["indexUpdateTag"] = indexUpdateTag
+                    params["updateTagDes"] = updateTagDes
+                    params["updateTagPho"] = updateTagPho
+                    params["updateTagLoc"] = updateTagLoc
+                    params["updateTagPeopleName"] = updateTagPeopleName
+                    return params
+                }
             }
+            queue.add(stringRequest)
         }
-        queue.add(stringRequest)
     }
 
+    /**
+     * Downloads a photo from the server.
+     */
     private fun downloadPhoto(fileName: String, onCompletion: () -> Unit) {
         val queue = Volley.newRequestQueue(appContext)
 
@@ -412,25 +346,25 @@ class PhotoRepository(context: Context) {
             Method.GET, uri,
             Response.Listener<String> { response ->
                 if (response != "" && response != null) {
-                    Log.d(TAG, "Download of photo with filename $fileName SUCCESS")
                     tempPhotoUpdates[fileName] = response
                     savePhotoInSharedPref(fileName, response)
                 }
-                else Log.d(TAG, "Download of photo with filename $fileName FAILED")
                 onCompletion()
 
             },
             Response.ErrorListener { error ->
-                Log.e(TAG, "Download photo failed: ${error.message}")
                 onCompletion()
             }) {}
         queue.add(stringRequest)
 
     }
-    private fun updatePhotoLiveData() {
-        photoLiveData.postValue(tempPhotoUpdates.toMap())
-    }
 
+
+    //METHODS FOR HANDLING SHARED PREFERENCES
+
+    /**
+     * Saves tags information to shared preferences.
+     */
     private fun saveTagsInSharedPref(tags: Tags) {
         val gson = Gson()
         val tagsJson = gson.toJson(tags)
@@ -440,11 +374,17 @@ class PhotoRepository(context: Context) {
         }
     }
 
+    /**
+     * Loads tags information from shared preferences.
+     */
     private fun loadTagsFromSharedPref(): Tags? {
         val tagsJson = sharedPref.getString("tags", null)?: return null
         return Gson().fromJson(tagsJson, Tags::class.java)
     }
 
+    /**
+     * Saves a photo to shared preferences.
+     */
     private fun savePhotoInSharedPref(fileName: String, imageBase64: String) {
         with(sharedPref.edit()) {
             putString(fileName, imageBase64)
@@ -452,19 +392,20 @@ class PhotoRepository(context: Context) {
         }
     }
 
+    /**
+     * Loads a photo from shared preferences.
+     */
     private fun loadPhotoFromSharedPref(fileName: String): String? {
         return sharedPref.getString(fileName, null)
     }
 
 
-    private fun findEmptySpaceId() : Int {
-        val numberOfTags = tagsLiveData.value?.numberOfTags?.toIntOrNull() ?: 0
-        val photoFilenames = tagsLiveData.value?.tagPhoto?.take(numberOfTags)?: listOf()
-        return photoFilenames.indexOfFirst { it == "na" }
-    }
+    //METHODS FOR ADDING TAGS AND PHOTOS TO LIVEDATA
 
+    /**
+     * Adds a tag to the [tagsLiveData] and saves it to shared preferences.
+     */
     private fun addTag(tagId : Int, tagDes: String, tagPho: String, tagLoc: String, tagPeopleName: String) {
-        Log.d(TAG, "Adding the photo to the liveData")
         tagsLiveData.value?.let {tags ->
             tags.tagId[tagId] = tagId.toString()
             tags.tagDes[tagId] = tagDes
@@ -477,6 +418,9 @@ class PhotoRepository(context: Context) {
         }
     }
 
+    /**
+     * Adds a photo to the [photoLiveData] and saves it to shared preferences.
+     */
     private fun addPhoto(fn : String, photoString : String) {
         photoLiveData.value?.let {map ->
             val newMap = map.toMutableMap()
@@ -486,46 +430,76 @@ class PhotoRepository(context: Context) {
         }
     }
 
+    /**
+     * Removes a photo from [photoLiveData] and shared preferences.
+     */
     private fun removePhoto(fileName: String) {
         val currentPhotos = photoLiveData.value?.toMutableMap() ?: mutableMapOf()
         currentPhotos.remove(fileName)?.let { photoLiveData.postValue(currentPhotos) }
     }
 
+    /**
+     * Updates [photoLiveData] with temporary photo updates.
+     */
+    private fun updatePhotoLiveData() {
+        photoLiveData.postValue(tempPhotoUpdates.toMap())
+    }
+
+    /**
+     * Finds the index of an empty space in the tag list.
+     */
+    private fun findEmptySpaceId() : Int {
+        val numberOfTags = tagsLiveData.value?.numberOfTags?.toIntOrNull() ?: 0
+        val photoFilenames = tagsLiveData.value?.tagPhoto?.take(numberOfTags)?: listOf()
+        return photoFilenames.indexOfFirst { it == "na" }
+    }
+
+
+    //METHODS TO HANDLE UNSYNCHED POSTS
+
+    /**
+     * Loads unsynchronized posts from shared preferences.
+     */
     private fun loadUnsyncedPost() : List<SyncItem> {
         val json = sharedPref.getString("unsynchedPosts", "[]")
         return Gson().fromJson(json, Array<SyncItem>::class.java).toList()
 
     }
 
+    /**
+     * Adds a post to unsynchronized posts in shared preferences.
+     */
     private fun addUnsynchedPost(id : Int, operation : SyncOperation) {
         val unsynchedPosts = loadUnsyncedPost().toMutableList()
         unsynchedPosts.add(SyncItem(id,operation))
-        Log.d("OFFLINE_MODE", "Adding the post with id $id to the unsynched posts. PeriodicTaskSceduled $periodicTaskScheduled")
         sharedPref.edit().putString("unsynchedPosts", Gson().toJson(unsynchedPosts)).apply()
         if (!periodicTaskScheduled && isNetworkAvailable()) startPeriodicServerCheck()
     }
 
+    /**
+     * Removes a post to unsynchronized posts in shared preferences.
+     */
     private fun removeSyncedPost(syncItemId: Int) {
-        tagsLiveData.value?.let { Log.d("OFFLINE_MODE", it.toString()) }
-        Log.d("OFFLINE_MODE", "Success of synching with server: Removing post with id $syncItemId from unsynched posts")
         val unsynchedPosts = loadUnsyncedPost().toMutableList()
         unsynchedPosts.removeAll { it.id == syncItemId }
         sharedPref.edit().putString("unsynchedPosts", Gson().toJson(unsynchedPosts)).apply()
     }
 
+    /**
+     * Loads in the unsynchronized posts and start the synchronization
+     */
     fun retryUnsynchedPosts() {
         val unsynchedPosts = loadUnsyncedPost().toMutableList()
-        if (unsynchedPosts.isEmpty()) {
-            Log.d("OFFLINE_MODE", "There are no unsynched posts to retry")
-            return
-        }
+        if (unsynchedPosts.isEmpty()) return
         retryUnsynchedPost(unsynchedPosts, 0)
     }
 
+    /**
+     * Retries a unsynchronized post at a specified index
+     */
     private fun retryUnsynchedPost(posts: List<SyncItem>, index : Int) {
         if (index >= posts.size) {
             if (periodicTaskScheduled) stopPeriodicServerCheck()
-            Log.d("OFFLINE_MODE", "All posts have been processed")
             return
         }
         val item = posts[index]
@@ -535,18 +509,18 @@ class PhotoRepository(context: Context) {
             val loc = tags.tagLocation[item.id]
             val people = tags.tagPeopleName[item.id]
 
-            Log.d("PLSFILENAME", "Filename in retry unsynched post + $fn")
 
             publishUnsyncedPost(item.id.toString(), fn, des, loc, people, item.operation,
                 onComplete = {retryUnsynchedPost(posts, index + 1)},
-                onOffline = {Log.d("OFFLINE_MODE", "Is offline again not everything was updated..")}
+                onOffline = {Log.d(TAG, "Could not synch everything")}
             )
         }
     }
 
-
+    /**
+     * Publishes an unsynchronized post to the server
+     */
     private fun publishUnsyncedPost(id: String, fn: String, des: String, loc: String, people: String, operation: SyncOperation, onComplete: () -> Unit, onOffline: () -> Unit) {
-        Log.d("OFFLINE_MODE", "INSIDE PublishUnsyncedPost FOR id $id and operation $operation")
         val userId = sharedPref.getString(appContext.getString(R.string.user_id_key), null) ?: run {
             Log.d(TAG, "User ID is unavailable.")
             return
@@ -555,26 +529,20 @@ class PhotoRepository(context: Context) {
         val onSuccessCallback: (Boolean) -> Unit = { offline ->
             if (offline) onOffline()
             if (!offline) removeSyncedPost(id.toInt())
-            else Log.d("OFFLINE_MODE", "Could not upload the tags, server still not connected")
             onComplete()
         }
         val onErrorCallback: () -> Unit = {
-            Log.d("OFFLINE_MODE", "Some real error has occured when updating the tags")
             removePhoto(fn)
             onComplete()
         }
 
         if (operation == SyncOperation.UPDATE_TAGS_OR_DELETE) {
-            Log.d("OFFLINE_MODE", "UPDATE TAGS OR DELETE: Only trying to update tags. id: $id, fn:$fn")
             updateTags(id, des, fn, loc, people, onSuccessCallback, onErrorCallback)
             return
         }
 
         photoLiveData.value?.get(fn)?.let { photo ->
-            Log.d("OFFLINE_MODE", "Found photo with filename: $fn")
-            Log.d("OFFLINE_MODE", "UPDATE OR NEW: Trying to upload photo with fn $fn")
             uploadPhoto(userId, id, fn, photo, onSuccess = {
-                Log.d("OFFLINE_MODE", "UPDATE OR NEW: Uploaded photo with fn $fn")
                 when (operation) {
                     SyncOperation.NEW -> insertNewTags(userId, id, des, fn, loc, people, onSuccessCallback, onErrorCallback)
                     SyncOperation.UPDATE -> updateTags(id, des, fn, loc, people, onSuccessCallback, onErrorCallback)
@@ -582,8 +550,94 @@ class PhotoRepository(context: Context) {
                 }
             }, onError = onErrorCallback)
         } ?: {
-            Log.d("OFFLINE_MODE", "No photo found for filename: $fn")
             onComplete()
         }
     }
+
+
+    // METHODS FOR HANDLING OFFLINE-MODE: CHECKING NETWORK/SERVER CONNECTION
+
+    /**
+     * Registers a network callback to monitor network availability.
+     */
+    private fun registerNetworkCallback() {
+        connectivityManager.registerNetworkCallback(networkRequest, object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                super.onAvailable(network)
+                if (loadUnsyncedPost().isNotEmpty()) {
+                    isServerReachable { reachable ->
+                        if (reachable) {
+                            retryUnsynchedPosts()
+                        } else {
+                            if (!periodicTaskScheduled) startPeriodicServerCheck()
+                        }
+                    }
+                }
+            }
+
+            override fun onLost(network: Network) {
+                super.onLost(network)
+                if (periodicTaskScheduled) stopPeriodicServerCheck()
+            }
+        })
+    }
+
+    /**
+     * Checks if the network is available.
+     */
+    private fun isNetworkAvailable(): Boolean {
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+    /**
+     * Checks if the server is reachable.
+     */
+    private fun isServerReachable(onComplete: (Boolean) -> Unit) {
+        val queue = Volley.newRequestQueue(appContext)
+        val url = "http://10.0.2.2:8080/getMethodTesting"
+
+        val stringRequest = object : StringRequest(
+            Method.GET, url,
+            Response.Listener<String> { response ->
+                onComplete(true)
+                Log.d(TAG, "The server is online")
+            },
+            Response.ErrorListener { error ->
+                if (error.cause is java.net.ConnectException) {
+                    onComplete(false)
+                    Log.d(TAG, "The server is offline")
+                }
+            }) {}
+        queue.add(stringRequest)
+    }
+
+    /**
+     * Starts a periodic check to determine server reachability.
+     */
+    private fun startPeriodicServerCheck() {
+        periodicTaskScheduled = true
+        executorService = Executors.newSingleThreadScheduledExecutor()
+        val periodicTask = Runnable {
+            if (isNetworkAvailable()) {
+                isServerReachable { reachable ->
+                    if (reachable) {
+                        retryUnsynchedPosts()
+                    }
+                }
+            }
+        }
+        executorService?.scheduleAtFixedRate(periodicTask, 0, 10, TimeUnit.SECONDS)
+    }
+
+    /**
+     * Stops the periodic server check.
+     */
+    fun stopPeriodicServerCheck() {
+        executorService?.shutdownNow()
+        executorService = null
+        periodicTaskScheduled = false
+    }
 }
+

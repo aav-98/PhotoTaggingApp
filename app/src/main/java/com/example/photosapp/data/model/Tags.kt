@@ -1,7 +1,7 @@
 package com.example.photosapp.data.model
 
 /**
- * Data class that captures the tags associated with a photo to properly store the photo on server-side
+ * Data class that captures the tags associated with a photo to properly store the photo on the application-side
  */
 data class Tags(
     val id: String,

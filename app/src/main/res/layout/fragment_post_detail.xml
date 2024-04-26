@@ -35,7 +35,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="16dp"
-                android:text="Description"
+                android:text="@string/description_label_text"
                 android:textStyle="bold"
                 android:labelFor="@id/descriptionView">
 
@@ -59,7 +59,7 @@
                 app:layout_constraintTop_toBottomOf="@id/descriptionView"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="16dp"
-                android:text="People in the photo"
+                android:text="@string/people_lable_text"
                 android:textStyle="bold"
                 android:labelFor="@id/peopleView">
 
@@ -85,7 +85,7 @@
                 app:layout_constraintTop_toBottomOf="@id/peopleView"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="16dp"
-                android:text="Location"
+                android:text="@string/location_lable_text"
                 android:labelFor="@id/locationView"
                 android:textStyle="bold">
 

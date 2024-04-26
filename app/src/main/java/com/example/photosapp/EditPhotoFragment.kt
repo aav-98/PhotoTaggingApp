@@ -29,17 +29,25 @@ import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilter
 import jp.co.cyberagent.android.gpuimage.util.Rotation
 import kotlin.math.roundToInt
 
-
+/**
+ * Fragment for editing photos with functionalities including brightness, contrast, saturation adjustments,
+ * as well as cropping and rotating images. This fragment leverages GPUImage to apply real-time filters
+ * and effects to images. The user interactions, like selecting different tools and applying adjustments,
+ * are managed through a dedicated UI consisting of sliders and tool selection options. Adjustments can be finalized
+ * or reverted, and the edited image can be navigated back to the previous fragment with changes applied.
+ */
 class EditPhotoFragment : Fragment(), CropImageView.OnCropImageCompleteListener {
 
+    private val TAG = javaClass.simpleName
+
     private var _binding: FragmentEditPhotoBinding? = null
+
     private val binding get() = _binding!!
 
     private val photoViewModel: PhotoViewModel by activityViewModels {
         PhotoViewModelFactory(requireActivity().applicationContext)
     }
     private val args: PreviewFragmentArgs by navArgs()
-    private val TAG = javaClass.simpleName
 
     private var imageBitMap: Bitmap? = null
 
@@ -53,8 +61,8 @@ class EditPhotoFragment : Fragment(), CropImageView.OnCropImageCompleteListener 
     ): View {
 
         _binding = FragmentEditPhotoBinding.inflate(inflater, container, false)
-        return binding.root
 
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -67,11 +75,11 @@ class EditPhotoFragment : Fragment(), CropImageView.OnCropImageCompleteListener 
         binding.cropImageView.setOnCropImageCompleteListener(this)
 
         val tools = listOf(
-            Tool("Brightness", R.drawable.baseline_brightness_6_24, ToolType.BRIGHTNESS),
-            Tool("Contrast", R.drawable.outline_contrast_black_24, ToolType.CONTRAST),
-            Tool("Saturation", R.drawable.baseline_color_lens_24, ToolType.SATURATION),
-            Tool("Crop", R.drawable.baseline_crop_24, ToolType.CROP),
-            Tool("Rotate", R.drawable.outline_rotate_right_black_24, ToolType.ROTATE)
+            Tool(getString(R.string.brightness), R.drawable.baseline_brightness_6_24, ToolType.BRIGHTNESS),
+            Tool(getString(R.string.contrast), R.drawable.outline_contrast_black_24, ToolType.CONTRAST),
+            Tool(getString(R.string.saturation), R.drawable.baseline_color_lens_24, ToolType.SATURATION),
+            Tool(getString(R.string.crop), R.drawable.baseline_crop_24, ToolType.CROP),
+            Tool(getString(R.string.rotate), R.drawable.outline_rotate_right_black_24, ToolType.ROTATE)
         )
         toolsRecyclerView.adapter = ToolsAdapter(tools) { selectedTool ->
             handleToolSelection(selectedTool)
@@ -80,11 +88,9 @@ class EditPhotoFragment : Fragment(), CropImageView.OnCropImageCompleteListener 
         photoViewModel.editedPhoto.value?.let {bitmap ->
             imageBitMap = bitmap
             binding.image.setImageBitmap(imageBitMap)
-            Log.d(TAG, "Image has been set")
         }
 
         binding.saveButton.setOnClickListener {
-            Log.d(TAG, "Save button clicked")
             imageBitMap?.let {photoViewModel.setEditedPhoto(imageBitMap as Bitmap)}
             if (args.mode == "new") findNavController().navigate(EditPhotoFragmentDirections.actionEditPhotoFragmentToPreviewFragment("newEdit"))
             else findNavController().navigate(EditPhotoFragmentDirections.actionEditPhotoFragmentToPreviewFragment("editEdit"))
@@ -96,6 +102,13 @@ class EditPhotoFragment : Fragment(), CropImageView.OnCropImageCompleteListener 
         _binding = null
     }
 
+    /**
+     * Handles tool selection for photo editing by hiding the tools' RecyclerView and adjusting the photo layout.
+     * Depending on the selected tool type, this function applies specific filters or performs image operations
+     * like cropping or rotating.
+     *
+     * @param tool The editing tool selected by the user, defined by its type (e.g., brightness, contrast, saturation, crop, rotate).
+     */
     private fun handleToolSelection(tool: Tool) {
         toolsRecyclerView.visibility = View.GONE
 
@@ -114,6 +127,13 @@ class EditPhotoFragment : Fragment(), CropImageView.OnCropImageCompleteListener 
         }
     }
 
+    /**
+     * Configures and applies a specific GPUImageFilter to the image, adjusting its visual properties based on user input.
+     *
+     * @param filter The GPUImageFilter to be applied to the image.
+     * @param rangeLimits A pair defining the minimum and maximum values for the filter adjustment.
+     * @param defaultProgress The initial position of the seek bar representing the filter's starting adjustment level.
+     */
     private fun adjustFilter(filter: GPUImageFilter, rangeLimits: Pair<Float, Float>, defaultProgress: Int) {
         binding.image.visibility = View.GONE
         binding.saveButton.visibility = View.GONE
@@ -158,9 +178,16 @@ class EditPhotoFragment : Fragment(), CropImageView.OnCropImageCompleteListener 
         }
     }
 
+    /**
+     * Applies the finalized filter adjustments to the image and updates the UI accordingly.
+     * This method renders the image with the specified filter adjustments and displays the result,
+     * updating the UI to reflect the changes made by the user during the editing process.
+     *
+     * @param filter The GPUImageFilter representing the finalized adjustments to be applied to the image.
+     */
     private fun finalizeFilterAdjustments(filter: GPUImageFilter) {
         val renderer = GPUImageRenderer(filter)
-        renderer.setRotation(Rotation.NORMAL, renderer.isFlippedHorizontally(), renderer.isFlippedVertically())
+        renderer.setRotation(Rotation.NORMAL, renderer.isFlippedHorizontally, renderer.isFlippedVertically)
         renderer.setScaleType(GPUImage.ScaleType.CENTER_CROP)
         val buffer = PixelBuffer(imageBitMap!!.width, imageBitMap!!.height)
         buffer.setRenderer(renderer)
@@ -170,7 +197,6 @@ class EditPhotoFragment : Fragment(), CropImageView.OnCropImageCompleteListener 
         val result = buffer.bitmap
 
         if (result != null) {
-            Log.d(TAG, "Adjustment completed with result: ${result.toString()}")
             imageBitMap = result
             binding.image.setImageBitmap(imageBitMap)
         }
@@ -182,6 +208,14 @@ class EditPhotoFragment : Fragment(), CropImageView.OnCropImageCompleteListener 
         if(!binding.saveButton.isEnabled) binding.saveButton.isEnabled = true
     }
 
+    /**
+    * Displays the crop or rotate options for the image editing interface.
+    * This method shows the CropImageView with crop overlay if specified,
+    * or displays the rotate button if rotation is selected,
+    * along with the necessary buttons for finalizing or cancelling the operation.
+    *
+    * @param isCrop Boolean value indicating whether to show crop overlay or rotate option.
+    */
     private fun cropOrRotateImage(isCrop: Boolean) {
         binding.image.visibility = View.GONE
         binding.saveButton.visibility = View.GONE
@@ -212,22 +246,27 @@ class EditPhotoFragment : Fragment(), CropImageView.OnCropImageCompleteListener 
     }
 
     private fun rotate() {
-        binding.cropImageView.rotateImage(90);
+        binding.cropImageView.rotateImage(90)
     }
 
+    /**
+     * Callback method invoked when the image cropping operation is completed.
+     * Handles the result of the crop operation, updating the image bitmap if successful,
+     * and resetting the UI after editing.
+     *
+     * @param view The CropImageView instance triggering the callback.
+     * @param result The CropResult containing the result of the cropping operation.
+     */
     override fun onCropImageComplete(view: CropImageView, result: CropImageView.CropResult) {
-        Log.d(TAG, "Crop: entered callback function onCropImageComplete")
         if (result.error == null) {
             val editedImage: Bitmap? = result.bitmap
             if (editedImage != null) {
                 imageBitMap = editedImage
-                Log.d(TAG, "Crop: Success in retrieving cropped photo")
                 binding.image.setImageBitmap(imageBitMap)
             } else {
-                Log.d(TAG, "Error retrieving edited image")
+                Log.e(TAG, "Error retrieving edited image")
             }
         } else {
-            Log.d(TAG, "Crop: error in retrieving result of edit")
             Log.e(TAG, "Error:", result.error)
         }
         resetUIAfterEditing()

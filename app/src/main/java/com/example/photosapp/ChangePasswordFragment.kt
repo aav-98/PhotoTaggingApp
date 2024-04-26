@@ -17,14 +17,16 @@ import com.example.photosapp.databinding.FragmentChangePasswordBinding
 import com.example.photosapp.ui.login.LoginViewModel
 import com.example.photosapp.data.Result
 
+/**
+ * Fragment responsible for handling password change functionality.
+ * Allows users to input a new password and initiates the change password process.
+ */
 class ChangePasswordFragment : Fragment() {
 
     private val TAG = javaClass.simpleName
 
     private var _binding: FragmentChangePasswordBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     private val loginViewModel: LoginViewModel by activityViewModels()
@@ -34,7 +36,7 @@ class ChangePasswordFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
+
         _binding = FragmentChangePasswordBinding.inflate(inflater, container, false)
 
         return binding.root
@@ -116,7 +118,7 @@ class ChangePasswordFragment : Fragment() {
     }
 
     private fun updateFragmentWithSuccess() {
-        val welcome = "Password Successfully Changed"
+        val welcome = getString(R.string.password_successfully_changed)
         findNavController().navigate(R.id.action_ChangePasswordFragment_to_HomeFragment)
         val appContext = context?.applicationContext ?: return
         Toast.makeText(appContext, welcome, Toast.LENGTH_LONG).show()
@@ -124,7 +126,7 @@ class ChangePasswordFragment : Fragment() {
 
     private fun showChangePasswordFailed() {
         val appContext = context?.applicationContext ?: return
-        Toast.makeText(appContext, "Change Password Failed", Toast.LENGTH_LONG).show()
+        Toast.makeText(appContext, getString(R.string.change_password_failed), Toast.LENGTH_LONG).show()
     }
 
     override fun onDestroyView() {

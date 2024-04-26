@@ -3,7 +3,7 @@ package com.example.photosapp
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.photoapp.data.LoginDataSource
+import com.example.photosapp.data.LoginDataSource
 import com.example.photosapp.data.PhotoRepository
 
 class PhotoViewModelFactory(private val appContext: Context) : ViewModelProvider.Factory {

@@ -1,29 +1,25 @@
 package com.example.photosapp
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import com.google.android.material.snackbar.Snackbar
+import android.view.View
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.GridLayoutManager
 import com.example.photosapp.databinding.ActivityMainBinding
 import com.example.photosapp.ui.login.LoginViewModel
 import com.example.photosapp.ui.login.LoginViewModelFactory
 
+/**
+ * The main activity of the app responsible for handling navigation and user authentication.
+ */
 class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
 
     private val TAG = javaClass.simpleName
@@ -40,11 +36,9 @@ class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        loginViewModel = ViewModelProvider(this, LoginViewModelFactory(this))
-            .get(LoginViewModel::class.java)
+        loginViewModel = ViewModelProvider(this, LoginViewModelFactory(this))[LoginViewModel::class.java]
 
-        photoViewModel = ViewModelProvider(this, PhotoViewModelFactory(this))
-            .get(PhotoViewModel::class.java)
+        photoViewModel = ViewModelProvider(this, PhotoViewModelFactory(this))[PhotoViewModel::class.java]
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -59,37 +53,41 @@ class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
         if (isLoggedIn()) {
             photoViewModel.loadTags()
             loginViewModel.loadUser()
-            //Fixme: There is probably a better way to do this?
+            //TODO: There is probably a better way to do this?
             photoViewModel.tagsLiveData.observe(this) {
                 photoViewModel.loadPhotos()
             }
             navController.navigate(R.id.action_global_HomeFragment)
-            Log.d(TAG, "Registered that user was logged in in main activity")
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination.id == R.id.HomeFragment) {
-                supportActionBar?.setDisplayHomeAsUpEnabled(false)
-                binding.addButton.visibility = View.VISIBLE
-                binding.profileButton.visibility = View.VISIBLE
-                binding.cancelButton.visibility = View.GONE
-            } else if (destination.id == R.id.LoginFragment) {
-                supportActionBar?.setDisplayHomeAsUpEnabled(false)
-                binding.addButton.visibility = View.GONE
-                binding.profileButton.visibility = View.GONE
-                binding.cancelButton.visibility = View.GONE
-            } else if (destination.id == R.id.editPhotoFragment || destination.id == R.id.PreviewFragment) {
-                supportActionBar?.setDisplayHomeAsUpEnabled(false)
-                binding.addButton.visibility = View.GONE
-                binding.profileButton.visibility = View.GONE
-                binding.cancelButton.visibility = View.VISIBLE
-                supportActionBar?.setDisplayShowTitleEnabled(false)
-            }
-            else {
-                supportActionBar?.setDisplayHomeAsUpEnabled(true)
-                binding.addButton.visibility = View.GONE
-                binding.profileButton.visibility = View.GONE
-                binding.cancelButton.visibility = View.GONE
+            when (destination.id) {
+                R.id.HomeFragment -> {
+                    supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                    binding.addButton.visibility = View.VISIBLE
+                    binding.profileButton.visibility = View.VISIBLE
+                    binding.cancelButton.visibility = View.GONE
+                }
+                R.id.LoginFragment -> {
+                    supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                    binding.addButton.visibility = View.GONE
+                    binding.profileButton.visibility = View.GONE
+                    binding.cancelButton.visibility = View.GONE
+                    supportActionBar?.setDisplayShowTitleEnabled(false)
+                }
+                R.id.editPhotoFragment, R.id.PreviewFragment -> {
+                    supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                    binding.addButton.visibility = View.GONE
+                    binding.profileButton.visibility = View.GONE
+                    binding.cancelButton.visibility = View.VISIBLE
+                    supportActionBar?.setDisplayShowTitleEnabled(false)
+                }
+                else -> {
+                    supportActionBar?.setDisplayHomeAsUpEnabled(true)
+                    binding.addButton.visibility = View.GONE
+                    binding.profileButton.visibility = View.GONE
+                    binding.cancelButton.visibility = View.GONE
+                }
             }
         }
 
@@ -119,13 +117,9 @@ class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
     }
 
     private fun isLoggedIn(): Boolean {
-        //TODO: should the user status be loaded from shared preferences in another file?
-        val sharedPreferences = getSharedPreferences("com.example.photosapp.USER_DETAILS", Context.MODE_PRIVATE)
-        val loggedIn = sharedPreferences.getBoolean(this.getString(R.string.is_logged_in), false)
-        val user_id = sharedPreferences.getString(this.getString(R.string.user_id_key), "no idea")
-        Log.d(TAG, loggedIn.toString())
-        Log.d(TAG, user_id.toString())
-        return loggedIn
+        val sharedPreferences =
+            getSharedPreferences("com.example.photosapp.USER_DETAILS", Context.MODE_PRIVATE)
+        return sharedPreferences.getBoolean(getString(R.string.is_logged_in), false)
     }
 
     private fun navigateToPreviewFragment(imageUri: Uri) {

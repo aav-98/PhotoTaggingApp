@@ -4,7 +4,7 @@ import com.example.photosapp.data.model.LoggedInUser
 import java.io.IOException
 
 /**
- * Authentication result : success (user details) or error message.
+ * Result : success (user details) or error message or user logged out
  */
 data class LoginResult(
     val success: LoggedInUser? = null,

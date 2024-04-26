@@ -1,46 +1,38 @@
 package com.example.photosapp.ui.login
 
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.annotation.StringRes
-import androidx.fragment.app.Fragment
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.findNavController
-import com.example.photosapp.databinding.FragmentLoginBinding
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.photosapp.PhotoViewModel
 import com.example.photosapp.PhotoViewModelFactory
-
 import com.example.photosapp.R
 import com.example.photosapp.data.model.LoggedInUser
-import java.io.IOException
+import com.example.photosapp.databinding.FragmentLoginBinding
 
+/**
+ * A Fragment that handles user authentication in the application.
+ * This class is responsible for managing the login interface where users enter their credentials.
+ * It observes changes in form state and login results to update the UI accordingly.
+ */
 class LoginFragment : Fragment() {
 
     private val TAG = javaClass.simpleName
 
-    //private lateinit var loginViewModel: LoginViewModel
     private var _binding: FragmentLoginBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     val loginViewModel: LoginViewModel by activityViewModels()
 
-    val photoViewModel: PhotoViewModel by activityViewModels {
+    private val photoViewModel: PhotoViewModel by activityViewModels {
         PhotoViewModelFactory(requireActivity().applicationContext)
     }
 
@@ -77,22 +69,16 @@ class LoginFragment : Fragment() {
                 }
             })
 
-        loginViewModel.loginResult.observe(viewLifecycleOwner,
-            Observer { loginResult ->
-                loginResult ?: return@Observer
+        loginViewModel.loginResult.observe(viewLifecycleOwner) { loginResult ->
+            loginResult?.let {
                 loadingProgressBar.visibility = View.GONE
-                loginResult.error?.let {
-                    showLoginFailed(it)
-                }
-                loginResult.success?.let {
-                    loginUser(it)
-                    Log.d(TAG, "Login success")
 
+                when {
+                    it.error != null -> showLoginFailed()
+                    it.success != null -> loginUser(it.success)
                 }
-                loginResult.loggedOut?.let {
-                    Log.d(TAG, "User logged out registered in login fragment")
-                }
-            })
+            }
+        }
 
         val afterTextChangedListener = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
@@ -120,8 +106,6 @@ class LoginFragment : Fragment() {
                     passwordEditText.text.toString()
                 )
                 loginButton.visibility = View.GONE
-                //Log.d(TAG, usernameEditText.text.toString())
-                //Log.d(TAG, passwordEditText.text.toString())
             }
             false
         }
@@ -132,17 +116,20 @@ class LoginFragment : Fragment() {
                 usernameEditText.text.toString(),
                 passwordEditText.text.toString()
             )
-            //loginButton.visibility = View.GONE
-            //Log.d(TAG, usernameEditText.text.toString())
-            //Log.d(TAG, passwordEditText.text.toString())
         }
     }
 
+    /**
+     * Handles post-login user operations. This function welcomes the user, initiates photo tag loading,
+     * and navigates to the HomeFragment upon successful tag loading.
+     *
+     * @param user The LoggedInUser object containing user details used for personalizing greeting.
+     *
+     */
     private fun loginUser(user: LoggedInUser) {
         val welcome = getString(R.string.welcome) + user.firstName
-        Log.d("NavController", "Current destination: ${findNavController().currentDestination?.id}")
         photoViewModel.loadTags()
-        //FixMe: Dont really need this with how the homefragment looks now
+        //TODO: Don't really need this with how the homefragment looks now
         photoViewModel.tagsLiveData.observe(viewLifecycleOwner) {
             photoViewModel.loadPhotos()
             findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)
@@ -151,9 +138,9 @@ class LoginFragment : Fragment() {
         Toast.makeText(appContext, welcome, Toast.LENGTH_LONG).show()
     }
 
-    private fun showLoginFailed(error: IOException) {
+    private fun showLoginFailed() {
         val appContext = context?.applicationContext ?: return
-        Toast.makeText(appContext, error.toString(), Toast.LENGTH_LONG).show()
+        Toast.makeText(appContext, "Login failed", Toast.LENGTH_LONG).show()
     }
 
     override fun onDestroyView() {

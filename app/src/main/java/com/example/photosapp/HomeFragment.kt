@@ -56,7 +56,6 @@ class HomeFragment : Fragment() {
         })
         binding.photosRecyclerView.adapter = adapter
         binding.photosRecyclerView.layoutManager = GridLayoutManager(context, 2)
-
         photoViewModel.tagsLiveData.observe(viewLifecycleOwner) { tags ->
             Log.d(TAG, "Tags observed changed")
             if (tags != null) {

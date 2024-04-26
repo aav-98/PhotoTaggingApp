@@ -46,10 +46,11 @@ class HomeFragment : Fragment() {
         val adapter = PhotosAdapter(photosList, object : OnPhotoClickListener {
             override fun onPhotoClick(position : Int) {
                 val bitmap = photosList[position].second
+                val fn = photosList[position].first
                 photoViewModel.setCurrentPhoto(bitmap)
                 photoViewModel.setEditedPhoto(bitmap)
                 val action =
-                    HomeFragmentDirections.actionHomeFragmentToPostDetailFragment(position)
+                    HomeFragmentDirections.actionHomeFragmentToPostDetailFragment(fn)
                 findNavController().navigate(action)
             }
         })

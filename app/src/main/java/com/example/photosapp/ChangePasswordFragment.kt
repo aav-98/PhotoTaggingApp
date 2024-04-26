@@ -47,6 +47,8 @@ class ChangePasswordFragment : Fragment() {
         val changePasswordButton = binding.changePasswordButton
         val loadingProgressBar = binding.loading
 
+        loginViewModel.resetChangePasswordResult()
+
         loginViewModel.newPasswordFormState.observe(viewLifecycleOwner,
             Observer { newPasswordFormState ->
                 if (newPasswordFormState == null) {
@@ -58,18 +60,25 @@ class ChangePasswordFragment : Fragment() {
                 }
             })
 
-        loginViewModel.changePasswordResult.observe(viewLifecycleOwner,
-            Observer { changePasswordResult ->
-                changePasswordResult ?: return@Observer
-                loadingProgressBar.visibility = View.GONE
-                if (changePasswordResult is Result.Success) {
+
+        loginViewModel.changePasswordResult.observe(viewLifecycleOwner, Observer { result ->
+            result ?: return@Observer
+            loadingProgressBar.visibility = View.GONE
+
+            when (result) {
+                is Result.Success -> {
                     updateFragmentWithSuccess()
                     Log.d(TAG, "Change Password Success")
                 }
-                else {
+                is Result.Error -> {
                     showChangePasswordFailed()
                 }
-            })
+                else -> {
+                    Log.d(TAG, "Change Password Result is empty")}
+            }
+        })
+
+
 
         val afterTextChangedListener = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {

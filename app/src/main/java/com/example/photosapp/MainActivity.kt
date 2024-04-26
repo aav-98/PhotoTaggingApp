@@ -55,6 +55,7 @@ class MainActivity : AppCompatActivity(), HomeFragment.MainActivityCallback {
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
+
         if (isLoggedIn()) {
             photoViewModel.loadTags()
             loginViewModel.loadUser()

@@ -3,6 +3,7 @@ package com.example.photosapp
 import android.graphics.Bitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import com.example.photosapp.data.PhotoRepository
 import com.example.photosapp.data.model.PhotoDetails
@@ -22,6 +23,7 @@ class PhotoViewModel(private val photoRepository: PhotoRepository) : ViewModel()
 
     private val _editedPhoto = MutableLiveData<Bitmap?>()
     val editedPhoto: LiveData<Bitmap?> = _editedPhoto
+
 
     fun loadTags() {
         photoRepository.getTags()
@@ -48,11 +50,6 @@ class PhotoViewModel(private val photoRepository: PhotoRepository) : ViewModel()
     fun setEditedPhoto(bitmapImage: Bitmap) {
         _editedPhoto.value = bitmapImage
     }
-
-    fun discardPhotoChanges() {
-        _editedPhoto.value = null
-    }
-
 
 
 }

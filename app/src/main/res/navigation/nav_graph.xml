@@ -35,8 +35,7 @@
             android:id="@+id/action_ProfileFragment_to_LoginFragment"
             app:destination="@+id/mainActivity"
             app:popUpTo="@id/nav_graph"
-            app:popUpToInclusive="true"
-        />
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_ProfileFragment_to_ChangePasswordFragment"
             app:destination="@id/ChangePasswordFragment" />
@@ -80,8 +79,8 @@
         android:label=" "
         tools:layout="@layout/fragment_post_detail" >
         <argument
-            android:name="position"
-            app:argType="integer" />
+            android:name="fn"
+            app:argType="string" />
         <action
             android:id="@+id/action_PostDetailFragment_to_PreviewFragment"
             app:destination="@id/PreviewFragment" />

@@ -132,7 +132,7 @@ class LoginFragment : Fragment() {
                 usernameEditText.text.toString(),
                 passwordEditText.text.toString()
             )
-            loginButton.visibility = View.GONE
+            //loginButton.visibility = View.GONE
             //Log.d(TAG, usernameEditText.text.toString())
             //Log.d(TAG, passwordEditText.text.toString())
         }

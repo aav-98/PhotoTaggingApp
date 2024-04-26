@@ -59,7 +59,6 @@ class HomeFragment : Fragment() {
         //Updating the recycleView with the tags and photos observed from tagsLiveData and photoLiveData
         photoViewModel.tagsLiveData.observe(viewLifecycleOwner) { tags ->
             tags?.let {
-                photoViewModel.loadPhotos()
 
                 photoViewModel.photoLiveData.observe(viewLifecycleOwner) { photosMap ->
                     photosList.clear()

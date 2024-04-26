@@ -66,5 +66,6 @@
     <string name="people_lable_text">People in the photo</string>
     <string name="location_lable_text">Location</string>
     <string name="replace_photo_button_text">Replace photo</string>
+    <string name="no_value">null</string>
 
 </resources>

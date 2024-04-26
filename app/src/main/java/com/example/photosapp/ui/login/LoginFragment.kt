@@ -129,7 +129,6 @@ class LoginFragment : Fragment() {
     private fun loginUser(user: LoggedInUser) {
         val welcome = getString(R.string.welcome) + user.firstName
         photoViewModel.loadTags()
-        //TODO: Don't really need this with how the homefragment looks now
         photoViewModel.tagsLiveData.observe(viewLifecycleOwner) {
             photoViewModel.loadPhotos()
             findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)

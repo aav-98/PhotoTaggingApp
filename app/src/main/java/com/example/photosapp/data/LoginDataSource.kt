@@ -123,7 +123,7 @@ class LoginDataSource(context: Context) {
         val url = "http://10.0.2.2:8080/methodPostChangePasswd"
 
         val hashedNewPassword = md5(newPassword)
-        val email = sharedPreferences.getString(appContext.getString(R.string.email_key), "default_email").toString()
+        val email = sharedPreferences.getString(appContext.getString(R.string.email_key), appContext.getString(R.string.no_value)).toString()
 
         val stringRequest = object : StringRequest(
             Method.POST, url,

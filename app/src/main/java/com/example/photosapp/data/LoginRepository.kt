@@ -111,15 +111,14 @@ class LoginRepository(val dataSource: LoginDataSource, context: Context) {
      * shared via LiveData to update the UI or other observers.
      */
     fun getUser() {
-        //TODO: update default values
         user.postValue(LoggedInUser(
-            id = sharedPref.getString(appContext.getString(R.string.user_id_key), "id"),
-            firstName = sharedPref.getString(appContext.getString(R.string.first_name_key), "firstName"),
-            lastName = sharedPref.getString(appContext.getString(R.string.last_name_key), "lastName"),
-            passHash = sharedPref.getString(appContext.getString(R.string.passHash_key), "passHash"),
-            email = sharedPref.getString(appContext.getString(R.string.email_key), "email"),
-            livingCity = sharedPref.getString(appContext.getString(R.string.living_city_key), "livingCity"),
-            yearOfBirth = sharedPref.getString(appContext.getString(R.string.year_of_birth_key), "yearOfBirth")
+            id = sharedPref.getString(appContext.getString(R.string.user_id_key), appContext.getString(R.string.no_value)),
+            firstName = sharedPref.getString(appContext.getString(R.string.first_name_key),  appContext.getString(R.string.no_value)),
+            lastName = sharedPref.getString(appContext.getString(R.string.last_name_key),  appContext.getString(R.string.no_value)),
+            passHash = sharedPref.getString(appContext.getString(R.string.passHash_key),  appContext.getString(R.string.no_value)),
+            email = sharedPref.getString(appContext.getString(R.string.email_key),  appContext.getString(R.string.no_value)),
+            livingCity = sharedPref.getString(appContext.getString(R.string.living_city_key),  appContext.getString(R.string.no_value)),
+            yearOfBirth = sharedPref.getString(appContext.getString(R.string.year_of_birth_key),  appContext.getString(R.string.no_value))
         ))
     }
 

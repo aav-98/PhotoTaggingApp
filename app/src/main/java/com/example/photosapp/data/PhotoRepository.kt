@@ -67,7 +67,7 @@ class PhotoRepository(context: Context) {
 
                 val stringRequest = object : StringRequest(
                     Method.GET, uri,
-                    Response.Listener<String> { response ->
+                    Response.Listener { response ->
                         val gson = Gson()
                         if (response != null) {
                             val tags: Tags = gson.fromJson(response, Tags::class.java)
@@ -229,7 +229,7 @@ class PhotoRepository(context: Context) {
 
         val stringRequest = object : StringRequest(
             Method.POST, url,
-            Response.Listener<String> { response ->
+            Response.Listener { response ->
                 if (response.toString() == "OK") onSuccess()
                 else onError()
             },
@@ -260,7 +260,7 @@ class PhotoRepository(context: Context) {
 
         val stringRequest = object : StringRequest(
             Method.POST, url,
-            Response.Listener<String> { response ->
+            Response.Listener { response ->
                 if (response.toString() == "OK") {
                     onSuccess(false)
                 } else {
@@ -303,7 +303,7 @@ class PhotoRepository(context: Context) {
 
             val stringRequest = object : StringRequest(
                 Method.POST, url,
-                Response.Listener<String> { response ->
+                Response.Listener { response ->
                     if (response.toString() == "OK") {
                         onSuccess(false)
                     } else {
@@ -344,7 +344,7 @@ class PhotoRepository(context: Context) {
 
         val stringRequest = object : StringRequest(
             Method.GET, uri,
-            Response.Listener<String> { response ->
+            Response.Listener { response ->
                 if (response != "" && response != null) {
                     tempPhotoUpdates[fileName] = response
                     savePhotoInSharedPref(fileName, response)
@@ -353,6 +353,7 @@ class PhotoRepository(context: Context) {
 
             },
             Response.ErrorListener { error ->
+                Log.e(TAG, "Error: ${error.message}")
                 onCompletion()
             }) {}
         queue.add(stringRequest)
@@ -512,7 +513,7 @@ class PhotoRepository(context: Context) {
 
             publishUnsyncedPost(item.id.toString(), fn, des, loc, people, item.operation,
                 onComplete = {retryUnsynchedPost(posts, index + 1)},
-                onOffline = {Log.d(TAG, "Could not synch everything")}
+                onOffline = {Log.d(TAG, "Could not sync everything")}
             )
         }
     }
@@ -600,7 +601,7 @@ class PhotoRepository(context: Context) {
 
         val stringRequest = object : StringRequest(
             Method.GET, url,
-            Response.Listener<String> { response ->
+            Response.Listener { _ ->
                 onComplete(true)
                 Log.d(TAG, "The server is online")
             },

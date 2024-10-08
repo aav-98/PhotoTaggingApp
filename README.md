@@ -2,7 +2,7 @@
 
 ## Overview
 
-This README provides detailed documentation for the "Photo Tagging System" developed by a group of students from the University of Oslo for their Spring 2024 course project. This Android application, written in Kotlin, enables users to manage their photo collections with advanced tagging and editing features. It supports both online and offline operations, ensuring functionality across various connectivity scenarios.
+This README provides detailed documentation for the "Photo Tagging System" developed by myself and a fellow student from the University of Oslo for our Spring 2024 course project. This Android application, written in Kotlin, enables users to manage their photo collections with advanced tagging and editing features. It supports both online and offline operations, ensuring functionality across various connectivity scenarios.
 
 ## Table of Contents
 
